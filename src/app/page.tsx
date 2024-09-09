@@ -1,59 +1,50 @@
 'use client';
+import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import { VariableSizeGrid as Grid } from 'react-window';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
-const BOARD_SIZE = 50; // 25x25 grid
+const BOARD_SIZE = 1000;
 
-const generateEmptyBoard = () =>
-  Array(BOARD_SIZE)
-    .fill(null)
-    .map(() => Array(BOARD_SIZE).fill(false));
+const generateEmptyBoard = () => new Map();
 
-  export default function Home() {
-
+export default function Home() {
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
 
-  const toggleCell = (row, col) => {
-    const newBoard = board.map((r, i) =>
-      r.map((cell, j) => (i === row && j === col ? !cell : cell))
-    );
+  const toggleCell = (row: number, col: number) => {
+    const newBoard = new Map(board);
+    const cellKey = `${row},${col}`;
+    if (newBoard.has(cellKey)) {
+      newBoard.delete(cellKey);
+    } else {
+      newBoard.set(cellKey, true);
+    }
     setBoard(newBoard);
   };
 
   const getNextGeneration = () => {
-    const newBoard = generateEmptyBoard();
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let col = 0; col < BOARD_SIZE; col++) {
-        const neighbors = getAliveNeighbors(row, col);
-        if (board[row][col]) {
-          newBoard[row][col] = neighbors === 2 || neighbors === 3;
-        } else {
-          newBoard[row][col] = neighbors === 3;
-        }
-      }
-    }
-    return newBoard;
-  };
+    const newBoard = new Map();
+    const neighborCount = new Map();
 
-  const getAliveNeighbors = (row, col) => {
-    let count = 0;
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        if (i === 0 && j === 0) continue;
-        const newRow = row + i;
-        const newCol = col + j;
-        if (
-          newRow >= 0 &&
-          newRow < BOARD_SIZE &&
-          newCol >= 0 &&
-          newCol < BOARD_SIZE &&
-          board[newRow][newCol]
-        ) {
-          count++;
+    board.forEach((_, key) => {
+      const [row, col] = key.split(',').map(Number);
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (i === 0 && j === 0) continue;
+          const neighborKey = `${row + i},${col + j}`;
+          neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
         }
       }
-    }
-    return count;
+    });
+
+    neighborCount.forEach((count, key) => {
+      if (count === 3 || (count === 2 && board.has(key))) {
+        newBoard.set(key, true);
+      }
+    });
+
+    return newBoard;
   };
 
   useEffect(() => {
@@ -61,42 +52,48 @@ const generateEmptyBoard = () =>
 
     const interval = setInterval(() => {
       setBoard(getNextGeneration());
-    }, 500);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [running, board]);
 
-    return (
-      <main className="container mx-auto min-h-screen p-4">
-      <div>
-      <div className="grid grid-cols-50 gap-0.5">
-          {board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => toggleCell(rowIndex, colIndex)}
-                className={`w-4 h-4 ${
-                  cell ? 'bg-green-500' : 'bg-gray-300'
-                } border border-gray-400`}
-              />
-            ))
-          )}
+  return (
+    <main className="container mx-auto min-h-screen p-4">
+      <div className='flex justify-center'>
+        <TransformWrapper>
+          <TransformComponent>
+            <Grid
+              columnCount={BOARD_SIZE}
+              rowCount={BOARD_SIZE}
+              columnWidth={() => 20}
+              rowHeight={() => 20}
+              width={1200}
+              height={700}
+            >
+              {({ columnIndex, rowIndex, style }) => (
+                <div
+                  style={style}
+                  onClick={() => toggleCell(rowIndex, columnIndex)}
+                  className={`border ${
+                    board.has(`${rowIndex},${columnIndex}`) ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                />
+              )}
+            </Grid>
+          </TransformComponent>
+        </TransformWrapper>
         </div>
-        <div className="mt-4">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
-            onClick={() => setRunning(!running)}
-          >
+        <div className="mt-4 flex gap-3">
+          <Button onClick={() => setRunning(!running)} variant="outline">
             {running ? 'Stop' : 'Start'}
-          </button>
-          <button
-            className="ml-2 bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded"
+          </Button>
+          <Button
             onClick={() => setBoard(generateEmptyBoard())}
+            variant='destructive'
           >
             Reset
-          </button>
+          </Button>
         </div>
-      </div>
-      </main>
-    );
-  }
+    </main>
+  );
+}
