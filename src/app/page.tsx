@@ -13,6 +13,11 @@ export default function Home() {
   const [running, setRunning] = useState(false);
 
   const toggleCell = (row: number, col: number) => {
+<<<<<<< HEAD
+    const newBoard = board.map((r, i) =>
+      r.map((cell, j) => (i === row && j === col ? !cell : cell))
+    );
+=======
     const newBoard = new Map(board);
     const cellKey = `${row},${col}`;
     if (newBoard.has(cellKey)) {
@@ -20,6 +25,7 @@ export default function Home() {
     } else {
       newBoard.set(cellKey, true);
     }
+>>>>>>> 9be3e41bba4104c0a29377b1c60ac7a149527a9a
     setBoard(newBoard);
   };
 
@@ -27,6 +33,23 @@ export default function Home() {
     const newBoard = new Map();
     const neighborCount = new Map();
 
+<<<<<<< HEAD
+  const getAliveNeighbors = (row: number, col: number) => {
+    let count = 0;
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        if (i === 0 && j === 0) continue;
+        const newRow = row + i;
+        const newCol = col + j;
+        if (
+          newRow >= 0 &&
+          newRow < BOARD_SIZE &&
+          newCol >= 0 &&
+          newCol < BOARD_SIZE &&
+          board[newRow][newCol]
+        ) {
+          count++;
+=======
     board.forEach((_, key) => {
       const [row, col] = key.split(',').map(Number);
       for (let i = -1; i <= 1; i++) {
@@ -34,6 +57,7 @@ export default function Home() {
           if (i === 0 && j === 0) continue;
           const neighborKey = `${row + i},${col + j}`;
           neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
+>>>>>>> 9be3e41bba4104c0a29377b1c60ac7a149527a9a
         }
       }
     });
@@ -57,6 +81,23 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board]);
 
+<<<<<<< HEAD
+    return (
+      <main className="container mx-auto min-h-screen p-4">
+      <div>
+      <div className="grid grid-cols-50 gap-0.5">
+          {board.map((row, rowIndex) =>
+            row.map((cell, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => toggleCell(rowIndex, colIndex)}
+                className={`w-full h-2.5 ${
+                  cell ? 'bg-green-500' : 'bg-gray-300'
+                } border border-gray-400`}
+              />
+            ))
+          )}
+=======
   return (
     <main className="container mx-auto min-h-screen p-4">
       <div className='flex justify-center'>
@@ -82,6 +123,7 @@ export default function Home() {
             </Grid>
           </TransformComponent>
         </TransformWrapper>
+>>>>>>> 9be3e41bba4104c0a29377b1c60ac7a149527a9a
         </div>
         <div className="mt-4 flex gap-3">
           <Button onClick={() => setRunning(!running)} variant="outline">
