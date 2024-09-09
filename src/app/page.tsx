@@ -13,7 +13,7 @@ const generateEmptyBoard = () =>
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
 
-  const toggleCell = (row, col) => {
+  const toggleCell = (row: number, col: number) => {
     const newBoard = board.map((r, i) =>
       r.map((cell, j) => (i === row && j === col ? !cell : cell))
     );
@@ -35,7 +35,7 @@ const generateEmptyBoard = () =>
     return newBoard;
   };
 
-  const getAliveNeighbors = (row, col) => {
+  const getAliveNeighbors = (row: number, col: number) => {
     let count = 0;
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
@@ -75,7 +75,7 @@ const generateEmptyBoard = () =>
               <div
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => toggleCell(rowIndex, colIndex)}
-                className={`w-4 h-4 ${
+                className={`w-full h-2.5 ${
                   cell ? 'bg-green-500' : 'bg-gray-300'
                 } border border-gray-400`}
               />
