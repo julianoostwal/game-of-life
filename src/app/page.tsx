@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function Home() {
     return (
-        <main className="bg-center bg-cover container mx-auto p-4  min-h-screen bg-gradient-to-r from-sky-700 to-sky-900">
+        <main className="bg-center bg-cover mx-auto p-4  min-h-screen bg-gradient-to-r from-sky-700 to-sky-900">
             <div className="animate-jump-in animate-delay-500">
                 <Image
                     src={"spaceship.svg"}
