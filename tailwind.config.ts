@@ -59,8 +59,23 @@ const config: Config = {
 		gridTemplateColumns: {
 			50: 'repeat(50, minmax(0, 1fr))',
 		},
+		animation: {
+			meteor: "meteor 5s linear infinite",
+		  },
+		  keyframes: {
+			meteor: {
+			  "0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+			  "70%": { opacity: "1" },
+			  "100%": {
+				transform: "rotate(215deg) translateX(-1500px)",
+				opacity: "0",
+			  },
+			},
+		  },
   	}
+
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("tailwindcss-animated")],
 };
+
 export default config;
