@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
-const BOARD_SIZE = 1000;
+const DEFAULT_BOARD_SIZE = 200;
 
 const generateEmptyBoard = () => new Map();
 
-export default function Play() {
+export default function Home() {
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
+  const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
+  const [speed, setSpeed] = useState(100);
 
   const toggleCell = (row: number, col: number) => {
     const newBoard = new Map(board);
@@ -47,12 +49,24 @@ export default function Play() {
     return newBoard;
   };
 
+  const randomizeBoard = (density = 0.1) => {
+    const newBoard = new Map();
+    for (let row = 0; row < BOARD_SIZE; row++) {
+      for (let col = 0; col < BOARD_SIZE; col++) {
+        if (Math.random() < density) {
+          newBoard.set(`${row},${col}`, true);
+        }
+      }
+    }
+    setBoard(newBoard);
+  };
+
   useEffect(() => {
     if (!running) return;
 
     const interval = setInterval(() => {
       setBoard(getNextGeneration());
-    }, 100);
+    }, speed);
 
     return () => clearInterval(interval);
   }, [running, board]);
@@ -65,8 +79,8 @@ export default function Play() {
             <Grid
               columnCount={BOARD_SIZE}
               rowCount={BOARD_SIZE}
-              columnWidth={() => 18}
-              rowHeight={() => 18}
+              columnWidth={() => 15}
+              rowHeight={() => 15}
               width={1200}
               height={700}
             >
@@ -82,18 +96,18 @@ export default function Play() {
             </Grid>
           </TransformComponent>
         </TransformWrapper>
-        </div>
-        <div className="mt-4 flex gap-3">
-          <Button onClick={() => setRunning(!running)} variant="outline">
-            {running ? 'Stop' : 'Start'}
-          </Button>
-          <Button
-            onClick={() => setBoard(generateEmptyBoard())}
-            variant='destructive'
-          >
-            Reset
-          </Button>
-        </div>
+      </div>
+      <div className="mt-4 flex gap-3 justify-center">
+        <Button onClick={() => setRunning(!running)} variant="outline">
+          {running ? 'Stop' : 'Start'}
+        </Button>
+        <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
+          Reset
+        </Button>
+        <Button onClick={() => randomizeBoard()}>
+          Randomize
+        </Button>
+      </div>
     </main>
   );
 }
