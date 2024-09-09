@@ -65,8 +65,8 @@ export default function Home() {
             <Grid
               columnCount={BOARD_SIZE}
               rowCount={BOARD_SIZE}
-              columnWidth={() => 20}
-              rowHeight={() => 20}
+              columnWidth={() => 18}
+              rowHeight={() => 18}
               width={1200}
               height={700}
             >
