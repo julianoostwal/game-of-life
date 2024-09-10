@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
@@ -23,18 +24,22 @@ export default function Home() {
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
-  const [speed, setSpeed] = useState(100); // speed in milliseconds
-  const sceneContainerRef = useRef(null); // Ref for the scene container
+  const [speed, setSpeed] = useState(100);
+  const sceneContainerRef = useRef(null);
+  const [blockColor, setBlockColor] = useState(0x00ff00);
+  const [boardGridColor, setBoardGridColor] = useState(0xffffff);
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState(0x000000);
 
   // Refs to hold Three.js objects
-  const sceneRef = useRef();
-  const cameraRef = useRef();
-  const rendererRef = useRef();
-  const controlsRef = useRef();
-  const boardGroupRef = useRef(new THREE.Group());
+  const sceneRef = useRef<any>();
+  const cameraRef = useRef<any>();
+  const rendererRef = useRef<any>();
+  const controlsRef = useRef<any>();
+  const boardGroupRef = useRef<any>(new THREE.Group());
 
   useEffect(() => {
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color(boardBackgroundColor);
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -46,7 +51,9 @@ export default function Home() {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    sceneContainerRef.current.appendChild(renderer.domElement);
+    if (sceneContainerRef.current) {
+      (sceneContainerRef.current as HTMLElement).appendChild(renderer.domElement);
+    }
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -67,6 +74,7 @@ export default function Home() {
     const gridHelper = new THREE.GridHelper(BOARD_SIZE, BOARD_SIZE);
     gridHelper.position.set(0, 0, 0); // Center the grid
     gridHelper.rotation.x = Math.PI / 2; // Rotate 90 degrees around the x-axis
+    gridHelper.material.color.set(boardGridColor);
 
     scene.add(gridHelper);
 
@@ -98,18 +106,23 @@ export default function Home() {
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
-
   }, [BOARD_SIZE]);
 
 
-  const updateBoardVisualization = (newBoard) => {
+  const updateBoardVisualization = (newBoard: any) => {
     const boardGroup = boardGroupRef.current;
-    boardGroup.clear(); // Clear previous cubes
+    boardGroup.clear();
 
-    newBoard.forEach((_, key) => {
+    newBoard.forEach((_: any, key: { split: (arg0: string) => { (): any; new(): any; map: { (arg0: NumberConstructor): [any, any]; new(): any; }; }; }) => {
       const [row, col] = key.split(',').map(Number);
+
+      // Check if the block is within the grid bounds
+      if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
+        return; // Skip adding blocks that are outside the grid
+      }
+
       const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      const material = new THREE.MeshStandardMaterial({ color: blockColor });
       const cube = new THREE.Mesh(geometry, material);
 
       // Align blocks with the grid
@@ -119,16 +132,16 @@ export default function Home() {
   };
 
 
-  const toggleCell = (row, col) => {
-    const newBoard = new Map(board);
-    const cellKey = `${row},${col}`;
-    if (newBoard.has(cellKey)) {
-      newBoard.delete(cellKey);
-    } else {
-      newBoard.set(cellKey, true);
-    }
-    setBoard(newBoard);
-  };
+  // const toggleCell = (row, col) => {
+  //   const newBoard = new Map(board);
+  //   const cellKey = `${row},${col}`;
+  //   if (newBoard.has(cellKey)) {
+  //     newBoard.delete(cellKey);
+  //   } else {
+  //     newBoard.set(cellKey, true);
+  //   }
+  //   setBoard(newBoard);
+  // };
 
   const getNextGeneration = () => {
     const newBoard = new Map();
