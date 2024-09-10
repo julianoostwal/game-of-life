@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
+import { Slider } from "@/components/ui/slider"
 
 const DEFAULT_BOARD_SIZE = 80;
 
@@ -30,7 +31,7 @@ export default function Home() {
       0.1,
       1000
     );
-    camera.position.set(0, 0, 30);
+    camera.position.set(0, 0, BOARD_SIZE);
   
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -82,8 +83,13 @@ export default function Home() {
       }
     };
     
-  }, []);
+  }, [BOARD_SIZE]);
   
+  useEffect(() => {
+    setRunning(false);
+    setBoard(generateEmptyBoard());
+    
+  }, [BOARD_SIZE]);
   
 
   const updateBoardVisualization = (newBoard) => {
@@ -176,14 +182,31 @@ export default function Home() {
         style={{ width: '100%', height: '80vh' }}
       />
 
-      <div className="mt-4 flex gap-3 justify-center">
-        <Button onClick={() => setRunning(!running)} variant="outline">
+      <div className="mt-12 flex gap-3 justify-center">
+        <Button onClick={() => setRunning(!running)} variant="secondary">
           {running ? 'Stop' : 'Start'}
         </Button>
         <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
           Reset
         </Button>
         <Button onClick={() => randomizeBoard()}>Randomize</Button>
+        <Slider
+          defaultValue={[speed]}
+          max={1000}
+          min={1}
+          step={1}
+          className="w-96"
+          onValueChange={(value) => setSpeed(value[0])}
+        />
+
+        <Slider
+          defaultValue={[BOARD_SIZE]}
+          max={1000}
+          min={1}
+          step={1}
+          className="w-96"
+          onValueChange={(value) => setBoardSize(value[0])}
+        />
       </div>
     </main>
   );
