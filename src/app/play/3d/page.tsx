@@ -4,7 +4,17 @@ import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
 import { Slider } from "@/components/ui/slider"
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import Link from 'next/link';
 const DEFAULT_BOARD_SIZE = 80;
 
 const generateEmptyBoard = () => new Map();
@@ -32,40 +42,40 @@ export default function Home() {
       1000
     );
     camera.position.set(0, 0, BOARD_SIZE);
-  
+
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     sceneContainerRef.current.appendChild(renderer.domElement);
-  
+
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
-  
+
     const pointLight = new THREE.PointLight(0xffffff, 0.6);
     pointLight.position.set(10, 10, 10);
     scene.add(pointLight);
-  
+
     // Add orbit controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-  
+
     // Add the board group to the scene
     scene.add(boardGroupRef.current);
-  
+
     // Add a grid helper
     const gridHelper = new THREE.GridHelper(BOARD_SIZE, BOARD_SIZE);
     gridHelper.position.set(0, 0, 0); // Center the grid
     gridHelper.rotation.x = Math.PI / 2; // Rotate 90 degrees around the x-axis
 
     scene.add(gridHelper);
-  
+
     // Save references
     sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
     controlsRef.current = controls;
-  
+
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
@@ -73,7 +83,7 @@ export default function Home() {
       renderer.render(scene, camera);
     };
     animate();
-  
+
     // Cleanup on unmount
     return () => {
       renderer.dispose();
@@ -82,32 +92,32 @@ export default function Home() {
         sceneContainerRef.current.removeChild(renderer.domElement);
       }
     };
-    
+
   }, [BOARD_SIZE]);
-  
+
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
-    
+
   }, [BOARD_SIZE]);
-  
+
 
   const updateBoardVisualization = (newBoard) => {
     const boardGroup = boardGroupRef.current;
     boardGroup.clear(); // Clear previous cubes
-  
+
     newBoard.forEach((_, key) => {
       const [row, col] = key.split(',').map(Number);
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
-      
+
       // Align blocks with the grid
       cube.position.set(col - BOARD_SIZE / 2 + 0.5, BOARD_SIZE / 2 - row - 0.5, 0);
       boardGroup.add(cube);
     });
   };
-  
+
 
   const toggleCell = (row, col) => {
     const newBoard = new Map(board);
@@ -189,25 +199,60 @@ export default function Home() {
         <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
           Reset
         </Button>
-        <Button onClick={() => randomizeBoard()}>Randomize</Button>
-        <Slider
-          defaultValue={[speed]}
-          max={1000}
-          min={1}
-          step={1}
-          className="w-96"
-          onValueChange={(value) => setSpeed(value[0])}
-        />
+        <Button onClick={() => randomizeBoard()} variant="outline" className='text-white'>Randomize</Button>
 
-        <Slider
-          defaultValue={[BOARD_SIZE]}
-          max={1000}
-          min={1}
-          step={1}
-          className="w-96"
-          onValueChange={(value) => setBoardSize(value[0])}
-        />
+         <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" color='white' className='text-white'>Edit</Button>
+      </DialogTrigger>
+      <Link href="/play">
+      <Button variant="outline" className='text-white'>Back</Button>
+      </Link>
+      <DialogContent className="sm:max-w-[425px] bg-white">
+        <DialogHeader>
+          <DialogTitle >Edit</DialogTitle>
+
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+             Speed
+            </Label>
+            <Slider
+              defaultValue={[speed]}
+              max={1000}
+              min={1}
+              step={1}
+              className="w-96"
+              onValueChange={(value) => setSpeed(value[0])}
+            />
+          </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="name" className="text-right">
+          big
+          </Label>
+          <Slider
+            defaultValue={[BOARD_SIZE]}
+            max={1000}
+            min={1}
+            step={1}
+            className="w-96"
+            onValueChange={(value) => setBoardSize(value[0])}
+          />
+
+        </div>
       </div>
+        <DialogFooter>
+          <Button type="submit">Save changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+      </div>
+
+    
+
     </main>
   );
 }
+
