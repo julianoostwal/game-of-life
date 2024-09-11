@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
@@ -198,7 +199,7 @@ export default function Home() {
   }, [board, blockColor]);
 
   return (
-    <main className="container mx-auto min-h-screen p-4">
+    <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
       {/* Scene container waar de Three.js scène wordt weergegeven */}
       <div
         ref={sceneContainerRef}
@@ -217,6 +218,9 @@ export default function Home() {
         <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
           Randomize
         </Button>
+        <Link href="/play">
+          <Button variant="outline" className='text-white'>2D</Button>
+        </Link>
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" className="text-white">
@@ -230,14 +234,14 @@ export default function Home() {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="speed" className="text-right">
-                  Speed
+                  Delay
                 </Label>
                 <Slider
-                  defaultValue={[speed]}
+                  defaultValue={[speedEdit]}
                   max={1000}
                   min={1}
                   step={1}
-                  className="w-96"
+                  className="w-64"
                   onValueChange={(value) => setSpeedEdit(value[0])}
                 />
               </div>
@@ -246,11 +250,11 @@ export default function Home() {
                   Board Size
                 </Label>
                 <Slider
-                  defaultValue={[BOARD_SIZE]}
+                  defaultValue={[BOARD_SIZEEdit]}
                   max={1000}
-                  min={1}
+                  min={5}
                   step={1}
-                  className="w-96"
+                  className="w-64"
                   onValueChange={(value) => setBoardSizeEdit(value[0])}
                 />
               </div>
