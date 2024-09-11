@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ export default function Home() {
   const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
 
   // Referenties voor de Three.js objecten
-  const sceneContainerRef = useRef(null);
+  const sceneContainerRef = useRef<any>(null);
   const sceneRef = useRef<any>();
   const cameraRef = useRef<any>();
   const rendererRef = useRef<any>();
@@ -78,7 +79,7 @@ export default function Home() {
     scene.add(pointLight);
 
     // Voeg orbit controls toe om rond de scène te bewegen
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement as any);
     controls.enableDamping = true;
 
     // Voeg de groep voor de blokken toe aan de scène
