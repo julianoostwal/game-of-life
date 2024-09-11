@@ -20,7 +20,7 @@ export default function Home() {
             <div className="flex items-center justify-center position: relative">
                 <div className="flex flex-col items-center animate-jump-in animate-delay-[2000ms]
 ">
-                    <p className="text-5xl mb-8 protest-guerrilla-regular text-center text-white animate-wiggle animate-thrice">
+                    <p className="text-5xl mb-8 protest-guerrilla-regular text-center text-white animate-wiggle animate-infinite">
                         Game Of Life
                     </p>
                     <Link href="/play">

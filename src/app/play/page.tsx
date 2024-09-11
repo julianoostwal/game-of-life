@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
@@ -72,7 +73,12 @@ export default function Home() {
   }, [running, board]);
 
   return (
-    <main className="container mx-auto min-h-screen p-4">
+    <main className="bg-gradient-to-r from-sky-700 to-purple-900  mx-auto min-h-screen p-4">
+
+      <Link href="/">
+      <Button>Exit</Button>
+      </Link>
+
       <div className='flex justify-center'>
         <TransformWrapper>
           <TransformComponent>
@@ -97,16 +103,19 @@ export default function Home() {
           </TransformComponent>
         </TransformWrapper>
       </div>
-      <div className="mt-4 flex gap-3 justify-center">
+      <div className="mt-4 flex gap-3 justify-center text-white">
         <Button onClick={() => setRunning(!running)} variant="outline">
           {running ? 'Stop' : 'Start'}
         </Button>
         <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
           Reset
         </Button>
-        <Button onClick={() => randomizeBoard()}>
+        <Button onClick={() => randomizeBoard()} variant="outline" className='text-white'>
           Randomize
         </Button>
+        <Link href="/play/3d">
+      <Button variant="outline" className='text-white'>3d</Button>
+      </Link>
       </div>
     </main>
   );

@@ -5,6 +5,9 @@ import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
 import { Slider } from "@/components/ui/slider"
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Link } from 'lucide-react';
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
@@ -52,7 +55,7 @@ export default function Home() {
     // Voeg verlichting toe aan de scène
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
-  
+
     const pointLight = new THREE.PointLight(0xffffff, 0.6);
     pointLight.position.set(10, 10, 10);
     scene.add(pointLight);
@@ -114,7 +117,7 @@ export default function Home() {
       if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
         return; // Sla blokken over die buiten het bord vallen
       }
-  
+
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshStandardMaterial({ color: blockColor });
       const cube = new THREE.Mesh(geometry, material);
@@ -185,41 +188,72 @@ export default function Home() {
   }, [board]);
 
   return (
-    <main className="container mx-auto min-h-screen p-4">
-      {/* Scene container waar de Three.js scène wordt weergegeven */}
-      <div
-        ref={sceneContainerRef}
-        className="flex justify-center"
-        style={{ width: '100%', height: '80vh' }}
-      />
+      <main className="container mx-auto min-h-screen p-4">
+          {/* Scene container waar de Three.js scène wordt weergegeven */}
+          <div ref={sceneContainerRef} className="flex justify-center" style={{ width: "100%", height: "80vh" }} />
 
-      {/* Bedieningselementen voor de simulatie */}
-      <div className="mt-12 flex gap-3 justify-center">
-        <Button onClick={() => setRunning(!running)} variant="secondary">
-          {running ? 'Stop' : 'Start'}
-        </Button>
-        <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
-          Reset
-        </Button>
-        <Button onClick={() => randomizeBoard()}>Randomize</Button>
-        <Slider
-          defaultValue={[speed]}
-          max={1000}
-          min={1}
-          step={1}
-          className="w-96"
-          onValueChange={(value) => setSpeed(value[0])}
-        />
+          {/* Bedieningselementen voor de simulatie */}
+          <div className="mt-12 flex gap-3 justify-center">
+              <Button onClick={() => setRunning(!running)} variant="secondary">
+                  {running ? "Stop" : "Start"}
+              </Button>
+              <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
+                  Reset
+              </Button>
+              <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
+                  Randomize
+              </Button>
 
-        <Slider
-          defaultValue={[BOARD_SIZE]}
-          max={1000}
-          min={1}
-          step={1}
-          className="w-96"
-          onValueChange={(value) => setBoardSize(value[0])}
-        />
-      </div>
-    </main>
+              <Dialog>
+                  <DialogTrigger asChild>
+                      <Button variant="outline" color="white" className="text-white">
+                          Edit
+                      </Button>
+                  </DialogTrigger>
+                  <Link href="/play">
+                      <Button variant="outline" className="text-white">
+                          Back
+                      </Button>
+                  </Link>
+                  <DialogContent className="sm:max-w-[425px] bg-white">
+                      <DialogHeader>
+                          <DialogTitle>Edit</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="name" className="text-right">
+                                  Speed
+                              </Label>
+                              <Slider
+                                  defaultValue={[speed]}
+                                  max={1000}
+                                  min={1}
+                                  step={1}
+                                  className="w-96"
+                                  onValueChange={(value) => setSpeed(value[0])}
+                              />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="name" className="text-right">
+                                  big
+                              </Label>
+                              <Slider
+                                  defaultValue={[BOARD_SIZE]}
+                                  max={1000}
+                                  min={1}
+                                  step={1}
+                                  className="w-96"
+                                  onValueChange={(value) => setBoardSize(value[0])}
+                              />
+                          </div>
+                      </div>
+                      <DialogFooter>
+                          <Button type="submit">Save changes</Button>
+                      </DialogFooter>
+                  </DialogContent>
+              </Dialog>
+          </div>
+      </main>
   );
 }
+
