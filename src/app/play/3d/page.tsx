@@ -35,13 +35,18 @@ export default function Home() {
   const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
   const [randomizedensity, setRandomizedensity] = useState(0.1);
   const [blockEdges, setBlockEdges] = useState(false);
+  const [boardOutline, setBoardOutline] = useState(true);
+  const [boardOutlineColor, setBoardOutlineColor] = useState<string>('#ffffff');
 
+  // State voor de bewerkbare instelling
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
   const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
   const [blockEdgesEdit, setBlockEdgesEdit] = useState(blockEdges);
   const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
+  const [boardOutlineEdit, setBoardOutlineEdit] = useState(boardOutline);
+  const [boardOutlineColorEdit, setBoardOutlineColorEdit] = useState(boardOutlineColor);
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef<any>(null);
@@ -61,7 +66,7 @@ export default function Home() {
       0.1,
       1000
     );
-    camera.position.set(0, 0, BOARD_SIZE); // Stel de camerastandpunt in
+    camera.position.set(0, 0, BOARD_SIZE * 1.5); // Stel de camerastandpunt in
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -138,11 +143,38 @@ export default function Home() {
     return new THREE.LineSegments(edges, lineMaterial);
   };
 
+  // Functie om randen rond het hele bord te maken
+  const createBoardOutline = () => {
+    // Maak een box-geometrie die overeenkomt met de grootte van het hele bord
+    const outlineGeometry = new THREE.BoxGeometry(BOARD_SIZE, BOARD_SIZE, BOARD_SIZE);
+    
+    // Maak randen van de geometrie
+    const outlineEdges = new THREE.EdgesGeometry(outlineGeometry);
+
+    // Maak een lijnmateriaal met de gewenste kleur (bijv. wit)
+    const outlineMaterial = new THREE.LineBasicMaterial({ color: boardOutlineColor});
+
+    // Maak de lijnsegmenten om de omtrek te vormen
+    const outline = new THREE.LineSegments(outlineEdges, outlineMaterial);
+
+    // Centreer de omtrek in het midden van het bord
+    outline.position.set(0, -1, 0);
+
+    // Retourneer het outline-object
+    return outline;
+  };
+
 
   // Functie om het speelbord bij te werken met blokken in 3D
   const updateBoardVisualization = (newBoard: any) => {
     const boardGroup = boardGroupRef.current;
     boardGroup.clear(); // Verwijder alle huidige blokken
+
+    // Voeg de bordomtrek toe als deze is ingeschakeld
+    if (boardOutline) {
+      const boardOutline2 = createBoardOutline();
+      boardGroup.add(boardOutline2);
+    }
 
     newBoard.forEach((_: any, key: string) => {
       const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
