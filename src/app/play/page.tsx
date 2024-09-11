@@ -1,5 +1,8 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
@@ -14,6 +17,15 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
+  // const [blockColor, setBlockColor] = useState<string>('#00ff00');
+  // const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
+  // const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');  
+
+  const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
+  const [speedEdit, setSpeedEdit] = useState(speed);
+  // const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
+  // const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
+  // const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
 
   const toggleCell = (row: number, col: number) => {
     const newBoard = new Map(board);
@@ -114,8 +126,86 @@ export default function Home() {
           Randomize
         </Button>
         <Link href="/play/3d">
-      <Button variant="outline" className='text-white'>3d</Button>
-      </Link>
+          <Button variant="outline" className='text-white'>3D</Button>
+        </Link>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="text-white">
+              Settings
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] bg-white">
+            <DialogHeader>
+              <DialogTitle>Settings</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="speed" className="text-right">
+                  Speed
+                </Label>
+                <Slider
+                  defaultValue={[speed]}
+                  max={1000}
+                  min={1}
+                  step={1}
+                  className="w-96"
+                  onValueChange={(value) => setSpeedEdit(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="boardSize" className="text-right">
+                  Board Size
+                </Label>
+                <Slider
+                  defaultValue={[BOARD_SIZE]}
+                  max={1000}
+                  min={1}
+                  step={1}
+                  className="w-96"
+                  onValueChange={(value) => setBoardSizeEdit(value[0])}
+                />
+              </div>
+              {/* <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="bgcolor" className="text-right">
+                  Background color
+                </Label>
+                <input
+                  type="color"
+                  id="bgcolor"
+                  value={boardBackgroundColorEdit}
+                  onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
+                />
+                <Label htmlFor="blockcolor" className="text-right">
+                  Block color
+                </Label>
+                <input
+                  type="color"
+                  id="blockcolor"
+                  value={blockColorEdit}
+                  onChange={(e) => setBlockColorEdit(e.target.value)}
+                />
+                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
+                <input
+                  type="color"
+                  id="gridcolor"
+                  value={boardGridColorEdit}
+                  onChange={(e) => setBoardGridColorEdit(e.target.value)}
+                />
+              </div> */}
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="submit" onClick={() => {
+                  setSpeed(speedEdit);
+                  setBoardSize(BOARD_SIZEEdit);
+                  // setBlockColor(blockColorEdit);
+                  // setBoardGridColor(boardGridColorEdit);
+                  // setBoardBackgroundColor(boardBackgroundColorEdit);
+                }}>Save changes</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </main>
   );

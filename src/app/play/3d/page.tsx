@@ -220,12 +220,12 @@ export default function Home() {
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" className="text-white">
-              Edit
+              Settings
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
-              <DialogTitle>Edit</DialogTitle>
+              <DialogTitle>Settings</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -261,7 +261,7 @@ export default function Home() {
                 <input
                   type="color"
                   id="bgcolor"
-                  value={boardBackgroundColor}
+                  value={boardBackgroundColorEdit}
                   onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
                 />
                 <Label htmlFor="blockcolor" className="text-right">
@@ -270,15 +270,15 @@ export default function Home() {
                 <input
                   type="color"
                   id="blockcolor"
-                  value={blockColor}
+                  value={blockColorEdit}
                   onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
                   <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
                 <input
                   type="color"
                   id="gridcolor"
-                  value={boardGridColor}
-                  onChange={(e) => setBoardGridColor(e.target.value)}
+                  value={boardGridColorEdit}
+                  onChange={(e) => setBoardGridColorEdit(e.target.value)}
                 />
               </div>
             </div>
