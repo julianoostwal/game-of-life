@@ -8,7 +8,6 @@ import { Slider } from "@/components/ui/slider"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import Link from 'next/link';
+
 const DEFAULT_BOARD_SIZE = 80;
 
 const generateEmptyBoard = () => new Map();
@@ -26,9 +26,9 @@ export default function Home() {
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
   const sceneContainerRef = useRef(null);
-  const [blockColor, setBlockColor] = useState(0x00ff00);
+  const [blockColor, setBlockColor] = useState('#00ff00'); // Initial block color in hex format
   const [boardGridColor, setBoardGridColor] = useState(0xffffff);
-  const [boardBackgroundColor, setBoardBackgroundColor] = useState(0x000000);
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000'); // Initial background color in hex format
 
   // Refs to hold Three.js objects
   const sceneRef = useRef<any>();
@@ -39,7 +39,8 @@ export default function Home() {
 
   useEffect(() => {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(boardBackgroundColor);
+    scene.background = new THREE.Color(boardBackgroundColor); // Set background color
+
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -100,14 +101,12 @@ export default function Home() {
         sceneContainerRef.current.removeChild(renderer.domElement);
       }
     };
-
-  }, [BOARD_SIZE]);
+  }, [BOARD_SIZE, boardBackgroundColor]); // Re-run useEffect when BOARD_SIZE or background color changes
 
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
   }, [BOARD_SIZE]);
-
 
   const updateBoardVisualization = (newBoard: any) => {
     const boardGroup = boardGroupRef.current;
@@ -116,13 +115,12 @@ export default function Home() {
     newBoard.forEach((_: any, key: { split: (arg0: string) => { (): any; new(): any; map: { (arg0: NumberConstructor): [any, any]; new(): any; }; }; }) => {
       const [row, col] = key.split(',').map(Number);
 
-      // Check if the block is within the grid bounds
       if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
         return; // Skip adding blocks that are outside the grid
       }
 
       const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshStandardMaterial({ color: blockColor });
+      const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) }); // Set block color
       const cube = new THREE.Mesh(geometry, material);
 
       // Align blocks with the grid
@@ -130,18 +128,6 @@ export default function Home() {
       boardGroup.add(cube);
     });
   };
-
-
-  // const toggleCell = (row, col) => {
-  //   const newBoard = new Map(board);
-  //   const cellKey = `${row},${col}`;
-  //   if (newBoard.has(cellKey)) {
-  //     newBoard.delete(cellKey);
-  //   } else {
-  //     newBoard.set(cellKey, true);
-  //   }
-  //   setBoard(newBoard);
-  // };
 
   const getNextGeneration = () => {
     const newBoard = new Map();
@@ -192,10 +178,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board]);
 
-  // Update board visualization whenever the board state changes
+
   useEffect(() => {
     updateBoardVisualization(board);
-  }, [board]);
+  }, [board, blockColor]); 
 
   return (
     <main className="container mx-auto min-h-screen p-4">
@@ -214,58 +200,63 @@ export default function Home() {
         </Button>
         <Button onClick={() => randomizeBoard()} variant="outline" className='text-white'>Randomize</Button>
 
-         <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" color='white' className='text-white'>Edit</Button>
-      </DialogTrigger>
-      <Link href="/play">
-      <Button variant="outline" className='text-white'>Back</Button>
-      </Link>
-      <DialogContent className="sm:max-w-[425px] bg-white">
-        <DialogHeader>
-          <DialogTitle >Edit</DialogTitle>
-
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-             Speed
-            </Label>
-            <Slider
-              defaultValue={[speed]}
-              max={1000}
-              min={1}
-              step={1}
-              className="w-96"
-              onValueChange={(value) => setSpeed(value[0])}
-            />
-          </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">
-          big
-          </Label>
-          <Slider
-            defaultValue={[BOARD_SIZE]}
-            max={1000}
-            min={1}
-            step={1}
-            className="w-96"
-            onValueChange={(value) => setBoardSize(value[0])}
-          />
-
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" color='white' className='text-white'>Edit</Button>
+          </DialogTrigger>
+          <Link href="/play">
+            <Button variant="outline" className='text-white'>Back</Button>
+          </Link>
+          <DialogContent className="sm:max-w-[425px] bg-white">
+            <DialogHeader>
+              <DialogTitle>Edit</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Speed</Label>
+                <Slider
+                  defaultValue={[speed]}
+                  max={1000}
+                  min={1}
+                  step={1}
+                  className="w-96"
+                  onValueChange={(value) => setSpeed(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Board Size</Label>
+                <Slider
+                  defaultValue={[BOARD_SIZE]}
+                  max={1000}
+                  min={1}
+                  step={1}
+                  className="w-96"
+                  onValueChange={(value) => setBoardSize(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="bgcolor" className="text-right">Background color</Label>
+                <input
+                  type="color"
+                  id="bgcolor"
+                  value={boardBackgroundColor}
+                  onChange={(e) => setBoardBackgroundColor(e.target.value)}
+                />
+                <Label htmlFor="blockcolor" className="text-right">Block color</Label>
+                <input
+                  type="color"
+                  id="blockcolor"
+                  value={blockColor}
+                  onChange={(e) => setBlockColor(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit">Save changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-        <DialogFooter>
-          <Button type="submit">Save changes</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-      </div>
-
-    
-
     </main>
   );
 }
-
