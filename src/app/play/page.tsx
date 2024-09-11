@@ -24,10 +24,12 @@ export default function Home() {
 
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
   const [boardGridColor, setBoardGridColor] = useState<string>('#000000');
+  const [randomizedensity, setRandomizedensity] = useState(0.1);
 
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
   const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
+  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
 
   const handleResize = () => {
     setCanvasSize({
@@ -74,7 +76,7 @@ export default function Home() {
     return newBoard;
   };
 
-  const randomizeBoard = (density = 0.1) => {
+  const randomizeBoard = (density = randomizedensity) => {
     const newBoard = new Map();
     for (let row = -100; row < 100; row++) {
       for (let col = -100; col < 100; col++) {
@@ -214,6 +216,19 @@ export default function Home() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="boardSize" className="text-right">
+                  Randomize Density
+                </Label>
+                <Slider
+                  defaultValue={[randomizedensityEdit]}
+                  max={1}
+                  min={0.001}
+                  step={0.001}
+                  className="w-64"
+                  onValueChange={(value) => setRandomizedensityEdit(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="blockcolor" className="text-right">
                   Block color
                 </Label>
@@ -236,6 +251,7 @@ export default function Home() {
               <DialogClose asChild>
                 <Button type="submit" onClick={() => {
                   setSpeed(speedEdit);
+                  setRandomizedensity(randomizedensityEdit);
                   setBlockColor(blockColorEdit);
                   setBoardGridColor(boardGridColorEdit);
                 }}>Save changes</Button>
