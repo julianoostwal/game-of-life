@@ -4,9 +4,17 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
-import { Slider } from "@/components/ui/slider"
+import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
@@ -20,9 +28,15 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
-  const [blockColor, setBlockColor] = useState('0x00ff00');
-  const [boardGridColor, setBoardGridColor] = useState('0xffffff');
-  const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000'); // Initial background color in hex format
+  const [blockColor, setBlockColor] = useState("0x00ff00");
+  const [boardGridColor, setBoardGridColor] = useState("0xffffff");
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000');
+
+  const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
+  const [speedEdit, setSpeedEdit] = useState(speed);
+  const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
+  const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
+  const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef(null);
@@ -45,7 +59,7 @@ export default function Home() {
     camera.position.set(0, 0, BOARD_SIZE); // Stel de camerastandpunt in
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight); // Stel de grootte van de renderer in
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     if (sceneContainerRef.current) {
       (sceneContainerRef.current as HTMLElement).appendChild(renderer.domElement);
@@ -109,7 +123,7 @@ export default function Home() {
     const boardGroup = boardGroupRef.current;
     boardGroup.clear(); // Verwijder alle huidige blokken
 
-    newBoard.forEach((_: any, key: { split: (arg0: string) => { (): any; new(): any; map: { (arg0: NumberConstructor): [any, any]; new(): any; }; }; }) => {
+    newBoard.forEach((_: any, key: any) => {
       const [row, col] = key.split(',').map(Number);
 
       // Controleer of het blok binnen de grenzen van het bord ligt
@@ -118,7 +132,7 @@ export default function Home() {
       }
 
       const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) }); // Set block color
+      const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) });
       const cube = new THREE.Mesh(geometry, material);
 
       // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
@@ -139,10 +153,7 @@ export default function Home() {
         for (let j = -1; j <= 1; j++) {
           if (i === 0 && j === 0) continue;
           const neighborKey = `${row + i},${col + j}`;
-          neighborCount.set(
-            neighborKey,
-            (neighborCount.get(neighborKey) || 0) + 1
-          );
+          neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
         }
       }
     });
@@ -179,7 +190,7 @@ export default function Home() {
     }, speed);
 
     return () => clearInterval(interval);
-  }, [running, board]);
+  }, [running, board, speed]);
 
   // Werk de visualisatie bij wanneer het bord verandert
   useEffect(() => {
@@ -187,25 +198,30 @@ export default function Home() {
   }, [board, blockColor]);
 
   return (
-      <main className="container mx-auto min-h-screen p-4">
-          {/* Scene container waar de Three.js scène wordt weergegeven */}
-          <div ref={sceneContainerRef} className="flex justify-center" style={{ width: "100%", height: "80vh" }} />
+    <main className="container mx-auto min-h-screen p-4">
+      {/* Scene container waar de Three.js scène wordt weergegeven */}
+      <div
+        ref={sceneContainerRef}
+        className="flex justify-center"
+        style={{ width: '100%', height: '80vh' }}
+      />
 
-          {/* Bedieningselementen voor de simulatie */}
-          <div className="mt-12 flex gap-3 justify-center">
-              <Button onClick={() => setRunning(!running)} variant="secondary">
-                  {running ? "Stop" : "Start"}
-              </Button>
-              <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
-                  Reset
-              </Button>
-              <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
-                  Randomize
-              </Button>
-
+      {/* Bedieningselementen voor de simulatie */}
+      <div className="mt-12 flex gap-3 justify-center">
+        <Button onClick={() => setRunning(!running)} variant="secondary">
+          {running ? 'Stop' : 'Start'}
+        </Button>
+        <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
+          Reset
+        </Button>
+        <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
+          Randomize
+        </Button>
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" color='white' className='text-white'>Edit</Button>
+            <Button variant="outline" className="text-white">
+              Edit
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
@@ -213,41 +229,49 @@ export default function Home() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Speed</Label>
+                <Label htmlFor="speed" className="text-right">
+                  Speed
+                </Label>
                 <Slider
                   defaultValue={[speed]}
                   max={1000}
                   min={1}
                   step={1}
                   className="w-96"
-                  onValueChange={(value) => setSpeed(value[0])}
+                  onValueChange={(value) => setSpeedEdit(value[0])}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Board Size</Label>
+                <Label htmlFor="boardSize" className="text-right">
+                  Board Size
+                </Label>
                 <Slider
                   defaultValue={[BOARD_SIZE]}
                   max={1000}
                   min={1}
                   step={1}
                   className="w-96"
-                  onValueChange={(value) => setBoardSize(value[0])}
+                  onValueChange={(value) => setBoardSizeEdit(value[0])}
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="bgcolor" className="text-right">Background color</Label>
+                <Label htmlFor="bgcolor" className="text-right">
+                  Background color
+                </Label>
                 <input
                   type="color"
                   id="bgcolor"
                   value={boardBackgroundColor}
-                  onChange={(e) => setBoardBackgroundColor(e.target.value)}
+                  onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
                 />
-                <Label htmlFor="blockcolor" className="text-right">Block color</Label>
+                <Label htmlFor="blockcolor" className="text-right">
+                  Block color
+                </Label>
                 <input
                   type="color"
                   id="blockcolor"
                   value={blockColor}
-                  onChange={(e) => setBlockColor(e.target.value)}
+                  onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
                   <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
                 <input
@@ -259,7 +283,15 @@ export default function Home() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <DialogClose asChild>
+                <Button type="submit" onClick={() => {
+                  setSpeed(speedEdit);
+                  setBoardSize(BOARD_SIZEEdit);
+                  setBlockColor(blockColorEdit);
+                  setBoardGridColor(boardGridColorEdit);
+                  setBoardBackgroundColor(boardBackgroundColorEdit);
+                }}>Save changes</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
