@@ -273,6 +273,13 @@ export default function Home() {
                   value={blockColor}
                   onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
+                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
+                <input
+                  type="color"
+                  id="gridcolor"
+                  value={boardGridColor}
+                  onChange={(e) => setBoardGridColor(e.target.value)}
+                />
               </div>
             </div>
             <DialogFooter>
