@@ -33,12 +33,15 @@ export default function Home() {
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
   const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
   const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
+  const [randomizedensity, setRandomizedensity] = useState(0.1);
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
   const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
   const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
+  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity);
+
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef(null);
@@ -170,9 +173,8 @@ const getNextGeneration = () => {
 };
 
 
-  // Functie om het bord willekeurig te vullen met blokken
 // Functie om het bord willekeurig te vullen met blokken in 3D
-const randomizeBoard = (density = 0.1) => {
+const randomizeBoard = (density = randomizedensity) => {
   const newBoard = new Map();
   for (let x = 0; x < BOARD_SIZE; x++) {
     for (let y = 0; y < BOARD_SIZE; y++) {
@@ -267,6 +269,19 @@ const randomizeBoard = (density = 0.1) => {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="boardSize" className="text-right">
+                  Randomize
+                </Label>
+                <Slider
+                  defaultValue={[randomizedensityEdit]}
+                  max={1}
+                  min={0.001}
+                  step={0.001}
+                  className="w-64"
+                  onValueChange={(value) => setRandomizedensityEdit(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="bgcolor" className="text-right">
                   Background color
                 </Label>
@@ -302,6 +317,7 @@ const randomizeBoard = (density = 0.1) => {
                   setBlockColor(blockColorEdit);
                   setBoardGridColor(boardGridColorEdit);
                   setBoardBackgroundColor(boardBackgroundColorEdit);
+                  setRandomizedensity(randomizedensityEdit);
                 }}>Save changes</Button>
               </DialogClose>
             </DialogFooter>
