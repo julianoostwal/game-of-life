@@ -21,7 +21,8 @@ import Link from 'next/link';
 const DEFAULT_BOARD_SIZE = 80;
 
 // Functie om een leeg bord te genereren als een Map
-const generateEmptyBoard = () => new Map();
+// Functie om een leeg 3D-bord te genereren als een Map
+const generateEmptyBoard = () => new Map<string, boolean>();
 
 export default function Home() {
   // State voor het speelbord, de running status, de bordgrootte, de snelheid en kleuren
@@ -81,13 +82,7 @@ export default function Home() {
     // Voeg de groep voor de blokken toe aan de scène
     scene.add(boardGroupRef.current);
 
-    // Voeg een grid-helper toe om het speelbord weer te geven
-    const gridHelper = new THREE.GridHelper(BOARD_SIZE, BOARD_SIZE);
-    gridHelper.position.set(0, 0, 0);
-    gridHelper.rotation.x = Math.PI / 2;
-    gridHelper.material.color.set(boardGridColor);
-
-    scene.add(gridHelper);
+    
 
     // Bewaar referenties van de gemaakte objecten
     sceneRef.current = scene;
@@ -120,67 +115,77 @@ export default function Home() {
   }, [BOARD_SIZE]);
 
   // Functie om het speelbord bij te werken met blokken
-  const updateBoardVisualization = (newBoard: any) => {
-    const boardGroup = boardGroupRef.current;
-    boardGroup.clear(); // Verwijder alle huidige blokken
+  // Functie om het speelbord bij te werken met blokken in 3D
+const updateBoardVisualization = (newBoard: any) => {
+  const boardGroup = boardGroupRef.current;
+  boardGroup.clear(); // Verwijder alle huidige blokken
 
-    newBoard.forEach((_: any, key: any) => {
-      const [row, col] = key.split(',').map(Number);
+  newBoard.forEach((_: any, key: string) => {
+    const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
 
-      // Controleer of het blok binnen de grenzen van het bord ligt
-      if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
-        return; // Sla blokken over die buiten het bord vallen
-      }
+    // Controleer of het blok binnen de grenzen van het bord ligt
+    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE || z < 0 || z >= BOARD_SIZE) {
+      return; // Sla blokken over die buiten het bord vallen
+    }
 
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) });
-      const cube = new THREE.Mesh(geometry, material);
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) });
+    const cube = new THREE.Mesh(geometry, material);
 
-      // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
-      cube.position.set(col - BOARD_SIZE / 2 + 0.5, BOARD_SIZE / 2 - row - 0.5, 0);
-      boardGroup.add(cube);
-    });
-  };
+    // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
+    cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 - 0.5, z - BOARD_SIZE / 2 + 0.5);
+    boardGroup.add(cube);
+  });
+};
+
 
   // Functie om de volgende generatie van het bord te berekenen
-  const getNextGeneration = () => {
-    const newBoard = new Map();
-    const neighborCount = new Map();
+// Functie om de volgende generatie van het bord te berekenen in 3D
+const getNextGeneration = () => {
+  const newBoard = new Map();
+  const neighborCount = new Map();
 
-    // Tel het aantal buren voor elke cel
-    board.forEach((_, key) => {
-      const [row, col] = key.split(',').map(Number);
-      for (let i = -1; i <= 1; i++) {
-        for (let j = -1; j <= 1; j++) {
-          if (i === 0 && j === 0) continue;
-          const neighborKey = `${row + i},${col + j}`;
+  // Tel het aantal buren voor elke cel
+  board.forEach((_, key) => {
+    const [x, y, z] = key.split(',').map(Number);
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        for (let k = -1; k <= 1; k++) {
+          if (i === 0 && j === 0 && k === 0) continue;
+          const neighborKey = `${x + i},${y + j},${z + k}`;
           neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
         }
       }
-    });
+    }
+  });
 
-    // Bepaal of een cel blijft bestaan of een nieuwe cel wordt toegevoegd
-    neighborCount.forEach((count, key) => {
-      if (count === 3 || (count === 2 && board.has(key))) {
-        newBoard.set(key, true);
-      }
-    });
+  // Bepaal of een cel blijft bestaan of een nieuwe cel wordt toegevoegd
+  neighborCount.forEach((count, key) => {
+    if (count === 3 || (count === 2 && board.has(key))) {
+      newBoard.set(key, true);
+    }
+  });
 
-    return newBoard;
-  };
+  return newBoard;
+};
+
 
   // Functie om het bord willekeurig te vullen met blokken
-  const randomizeBoard = (density = 0.1) => {
-    const newBoard = new Map();
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let col = 0; col < BOARD_SIZE; col++) {
+// Functie om het bord willekeurig te vullen met blokken in 3D
+const randomizeBoard = (density = 0.1) => {
+  const newBoard = new Map();
+  for (let x = 0; x < BOARD_SIZE; x++) {
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let z = 0; z < BOARD_SIZE; z++) {
         if (Math.random() < density) {
-          newBoard.set(`${row},${col}`, true);
+          newBoard.set(`${x},${y},${z}`, true); // Voeg de Z-coördinaat toe
         }
       }
     }
-    setBoard(newBoard);
-  };
+  }
+  setBoard(newBoard);
+};
+
 
   // Start of stop de simulatie op basis van de "running" status
   useEffect(() => {
