@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from './OrbitControls';
+import { OrbitControls } from '../OrbitControls';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import {
@@ -16,11 +16,11 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Standaardgrootte van het speelbord
-const DEFAULT_BOARD_SIZE = 80;
+const DEFAULT_BOARD_SIZE = 15;
 
-// Functie om een leeg bord te genereren als een Map
 // Functie om een leeg 3D-bord te genereren als een Map
 const generateEmptyBoard = () => new Map<string, boolean>();
 
@@ -31,17 +31,16 @@ export default function Home() {
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
-  const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
   const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
   const [randomizedensity, setRandomizedensity] = useState(0.1);
+  const [blockEdges, setBlockEdges] = useState(false);
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
-  const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
   const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
-  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity);
-
+  const [blockEdgesEdit, setBlockEdgesEdit] = useState(blockEdges);
+  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef(null);
@@ -85,7 +84,22 @@ export default function Home() {
     // Voeg de groep voor de blokken toe aan de scène
     scene.add(boardGroupRef.current);
 
-
+    // Voeg sterren toe aan de scène voor een achtergrondeffect
+    const stars = new Array(0);
+    for (let i = 0; i < 10000; i++) {
+      const x = THREE.MathUtils.randFloatSpread(1200);
+      const y = THREE.MathUtils.randFloatSpread(1200);
+      const z = THREE.MathUtils.randFloatSpread(1200);
+      stars.push(x, y, z);
+    }
+    const starsGeometry = new THREE.BufferGeometry();
+    starsGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(stars, 3)
+    );
+    const starsMaterial = new THREE.PointsMaterial({ color: 0x888888 });
+    const starField = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(starField);
 
     // Bewaar referenties van de gemaakte objecten
     sceneRef.current = scene;
@@ -109,7 +123,7 @@ export default function Home() {
         sceneContainerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [BOARD_SIZE, boardBackgroundColor, boardGridColor]);
+  }, [BOARD_SIZE, boardBackgroundColor]);
 
   // Reset het bord wanneer de grootte van het bord verandert
   useEffect(() => {
@@ -117,32 +131,43 @@ export default function Home() {
     setBoard(generateEmptyBoard());
   }, [BOARD_SIZE]);
 
-  // Functie om het speelbord bij te werken met blokken
+  const createEdges = (geometry: THREE.BoxGeometry) => {
+    const edges = new THREE.EdgesGeometry(geometry);
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black color
+    return new THREE.LineSegments(edges, lineMaterial);
+  };
+
+
   // Functie om het speelbord bij te werken met blokken in 3D
-const updateBoardVisualization = (newBoard: any) => {
-  const boardGroup = boardGroupRef.current;
-  boardGroup.clear(); // Verwijder alle huidige blokken
+  const updateBoardVisualization = (newBoard: any) => {
+    const boardGroup = boardGroupRef.current;
+    boardGroup.clear(); // Verwijder alle huidige blokken
 
-  newBoard.forEach((_: any, key: string) => {
-    const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
+    newBoard.forEach((_: any, key: string) => {
+      const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
 
-    // Controleer of het blok binnen de grenzen van het bord ligt
-    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE || z < 0 || z >= BOARD_SIZE) {
-      return; // Sla blokken over die buiten het bord vallen
-    }
+      // Controleer of het blok binnen de grenzen van het bord ligt
+      if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE || z < 0 || z >= BOARD_SIZE) {
+        return; // Sla blokken over die buiten het bord vallen
+      }
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) });
-    const cube = new THREE.Mesh(geometry, material);
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) });
+      const cube = new THREE.Mesh(geometry, material);
 
-    // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
-    cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 - 0.5, z - BOARD_SIZE / 2 + 0.5);
-    boardGroup.add(cube);
-  });
-};
+      // Voeg edges toe aan de cube
+      if (blockEdges) {
+        const edges = createEdges(geometry);
+        cube.add(edges);
+      }
+
+      // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
+      cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 - 0.5, z - BOARD_SIZE / 2 + 0.5);
+      boardGroup.add(cube);
+    });
+  };
 
 
-  // Functie om de volgende generatie van het bord te berekenen
 // Functie om de volgende generatie van het bord te berekenen in 3D
 const getNextGeneration = () => {
   const newBoard = new Map();
@@ -203,7 +228,7 @@ const randomizeBoard = (density = randomizedensity) => {
   // Werk de visualisatie bij wanneer het bord verandert
   useEffect(() => {
     updateBoardVisualization(board);
-  }, [board, blockColor]);
+  }, [board, blockColor, blockEdges]);
 
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
@@ -261,7 +286,7 @@ const randomizeBoard = (density = randomizedensity) => {
                 </Label>
                 <Slider
                   defaultValue={[BOARD_SIZEEdit]}
-                  max={1000}
+                  max={100}
                   min={5}
                   step={1}
                   className="w-64"
@@ -300,14 +325,16 @@ const randomizeBoard = (density = randomizedensity) => {
                   value={blockColorEdit}
                   onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
-                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
-                <input
-                  type="color"
-                  id="gridcolor"
-                  value={boardGridColorEdit}
-                  onChange={(e) => setBoardGridColorEdit(e.target.value)}
-                />
               </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="edges" checked={blockEdgesEdit} onCheckedChange={(e) => setBlockEdgesEdit(e as boolean)} />
+              <label
+                htmlFor="edges"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Enable edges
+              </label>
+            </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
@@ -315,9 +342,9 @@ const randomizeBoard = (density = randomizedensity) => {
                   setSpeed(speedEdit);
                   setBoardSize(BOARD_SIZEEdit);
                   setBlockColor(blockColorEdit);
-                  setBoardGridColor(boardGridColorEdit);
                   setBoardBackgroundColor(boardBackgroundColorEdit);
                   setRandomizedensity(randomizedensityEdit);
+                  setBlockEdges(blockEdgesEdit);
                 }}>Save changes</Button>
               </DialogClose>
             </DialogFooter>

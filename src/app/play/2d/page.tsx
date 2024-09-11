@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from './OrbitControls';
+import { OrbitControls } from '../OrbitControls';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import {
@@ -88,6 +88,23 @@ export default function Home() {
     gridHelper.material.color.set(boardGridColor);
 
     scene.add(gridHelper);
+
+    // Voeg sterren toe aan de scène voor een achtergrondeffect
+    const stars = new Array(0);
+    for (let i = 0; i < 10000; i++) {
+      const x = THREE.MathUtils.randFloatSpread(2000);
+      const y = THREE.MathUtils.randFloatSpread(2000);
+      const z = THREE.MathUtils.randFloatSpread(2000);
+      stars.push(x, y, z);
+    }
+    const starsGeometry = new THREE.BufferGeometry();
+    starsGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(stars, 3)
+    );
+    const starsMaterial = new THREE.PointsMaterial({ color: 0x888888 });
+    const starField = new THREE.Points(starsGeometry, starsMaterial);
+    scene.add(starField);
 
     // Bewaar referenties van de gemaakte objecten
     sceneRef.current = scene;
