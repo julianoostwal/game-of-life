@@ -6,8 +6,8 @@ import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
 import { Slider } from "@/components/ui/slider"
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Link } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
@@ -203,26 +203,20 @@ export default function Home() {
               <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
                   Randomize
               </Button>
-
               <Dialog>
                   <DialogTrigger asChild>
                       <Button variant="outline" color="white" className="text-white">
-                          Edit
+                          Settings
                       </Button>
                   </DialogTrigger>
-                  <Link href="/play">
-                      <Button variant="outline" className="text-white">
-                          Back
-                      </Button>
-                  </Link>
                   <DialogContent className="sm:max-w-[425px] bg-white">
                       <DialogHeader>
-                          <DialogTitle>Edit</DialogTitle>
+                          <DialogTitle>Settings</DialogTitle>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                           <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="name" className="text-right">
-                                  Speed
+                                  Delay
                               </Label>
                               <Slider
                                   defaultValue={[speed]}
@@ -235,7 +229,7 @@ export default function Home() {
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="name" className="text-right">
-                                  big
+                                  Grid size
                               </Label>
                               <Slider
                                   defaultValue={[BOARD_SIZE]}
@@ -248,10 +242,17 @@ export default function Home() {
                           </div>
                       </div>
                       <DialogFooter>
+                        <DialogClose asChild>
                           <Button type="submit">Save changes</Button>
+                        </DialogClose>
                       </DialogFooter>
                   </DialogContent>
               </Dialog>
+              <Link href="/play">
+                <Button variant="outline" className="text-white">
+                    2D
+                </Button>
+              </Link>
           </div>
       </main>
   );
