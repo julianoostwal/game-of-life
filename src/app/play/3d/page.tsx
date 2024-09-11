@@ -20,8 +20,8 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
-  const [blockColor, setBlockColor] = useState(0x00ff00);
-  const [boardGridColor, setBoardGridColor] = useState(0xffffff);
+  const [blockColor, setBlockColor] = useState('0x00ff00');
+  const [boardGridColor, setBoardGridColor] = useState('0xffffff');
   const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000'); // Initial background color in hex format
 
   // Referenties voor de Three.js objecten
@@ -248,6 +248,13 @@ export default function Home() {
                   id="blockcolor"
                   value={blockColor}
                   onChange={(e) => setBlockColor(e.target.value)}
+                />
+                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
+                <input
+                  type="color"
+                  id="gridcolor"
+                  value={boardGridColor}
+                  onChange={(e) => setBoardGridColor(e.target.value)}
                 />
               </div>
             </div>
