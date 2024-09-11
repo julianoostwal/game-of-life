@@ -28,9 +28,9 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
-  const [blockColor, setBlockColor] = useState("0x00ff00");
-  const [boardGridColor, setBoardGridColor] = useState("0xffffff");
-  const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000');
+  const [blockColor, setBlockColor] = useState<string>('#00ff00');
+  const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');  
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
