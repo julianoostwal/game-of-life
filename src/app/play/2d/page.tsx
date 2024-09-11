@@ -32,12 +32,14 @@ export default function Home() {
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
   const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
   const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
+  const [randomizedensity, setRandomizedensity] = useState(0.1);
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
   const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
   const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
+  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef(null);
@@ -187,7 +189,7 @@ export default function Home() {
   };
 
   // Functie om het bord willekeurig te vullen met blokken
-  const randomizeBoard = (density = 0.1) => {
+  const randomizeBoard = (density = randomizedensityEdit) => {
     const newBoard = new Map();
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -279,6 +281,19 @@ export default function Home() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="boardSize" className="text-right">
+                  Randomize Density
+                </Label>
+                <Slider
+                  defaultValue={[randomizedensityEdit]}
+                  max={1}
+                  min={0.001}
+                  step={0.001}
+                  className="w-64"
+                  onValueChange={(value) => setRandomizedensityEdit(value[0])}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="bgcolor" className="text-right">
                   Background color
                 </Label>
@@ -311,6 +326,7 @@ export default function Home() {
                 <Button type="submit" onClick={() => {
                   setSpeed(speedEdit);
                   setBoardSize(BOARD_SIZEEdit);
+                  setRandomizedensity(randomizedensityEdit);
                   setBlockColor(blockColorEdit);
                   setBoardGridColor(boardGridColorEdit);
                   setBoardBackgroundColor(boardBackgroundColorEdit);
