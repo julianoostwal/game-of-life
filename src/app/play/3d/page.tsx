@@ -21,7 +21,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 15;
 
-// Functie om een leeg bord te genereren als een Map
 // Functie om een leeg 3D-bord te genereren als een Map
 const generateEmptyBoard = () => new Map<string, boolean>();
 
@@ -32,14 +31,12 @@ export default function Home() {
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
-  const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
   const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
   const [blockEdges, setBlockEdges] = useState(false);
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
-  const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
   const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
   const [blockEdgesEdit, setBlockEdgesEdit] = useState(blockEdges);
 
@@ -124,7 +121,7 @@ export default function Home() {
         sceneContainerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [BOARD_SIZE, boardBackgroundColor, boardGridColor]);
+  }, [BOARD_SIZE, boardBackgroundColor]);
 
   // Reset het bord wanneer de grootte van het bord verandert
   useEffect(() => {
@@ -169,7 +166,6 @@ export default function Home() {
   };  
 
 
-  // Functie om de volgende generatie van het bord te berekenen
 // Functie om de volgende generatie van het bord te berekenen in 3D
 const getNextGeneration = () => {
   const newBoard = new Map();
@@ -200,7 +196,6 @@ const getNextGeneration = () => {
 };
 
 
-  // Functie om het bord willekeurig te vullen met blokken
 // Functie om het bord willekeurig te vullen met blokken in 3D
 const randomizeBoard = (density = 0.1) => {
   const newBoard = new Map();
@@ -289,7 +284,7 @@ const randomizeBoard = (density = 0.1) => {
                 </Label>
                 <Slider
                   defaultValue={[BOARD_SIZEEdit]}
-                  max={200}
+                  max={100}
                   min={5}
                   step={1}
                   className="w-64"
@@ -315,13 +310,6 @@ const randomizeBoard = (density = 0.1) => {
                   value={blockColorEdit}
                   onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
-                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
-                <input
-                  type="color"
-                  id="gridcolor"
-                  value={boardGridColorEdit}
-                  onChange={(e) => setBoardGridColorEdit(e.target.value)}
-                />
               </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="edges" checked={blockEdgesEdit} onCheckedChange={(e) => setBlockEdgesEdit(e as boolean)} />
@@ -339,7 +327,6 @@ const randomizeBoard = (density = 0.1) => {
                   setSpeed(speedEdit);
                   setBoardSize(BOARD_SIZEEdit);
                   setBlockColor(blockColorEdit);
-                  setBoardGridColor(boardGridColorEdit);
                   setBoardBackgroundColor(boardBackgroundColorEdit);
                   setBlockEdges(blockEdgesEdit);
                 }}>Save changes</Button>
