@@ -178,6 +178,11 @@ export default function Home() {
         <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
           Randomize
         </Button>
+        <Link href="/play/2d">
+          <Button variant="outline" className="text-white">
+            2d
+          </Button>
+        </Link>
         <Link href="/play/3d">
           <Button variant="outline" className="text-white">
             3d

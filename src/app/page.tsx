@@ -23,13 +23,25 @@ export default function Home() {
                     <p className="text-5xl mb-8 protest-guerrilla-regular text-center text-white animate-wiggle animate-infinite">
                         Game Of Life
                     </p>
+<div className="flex justify-center">
                     <Link href="/play">
-                        <Button variant={"destructive"} className="text-5xl p-12">
-                            Play!
+                        <Button variant={"destructive"} className="text-3xl mt-2 px-12 py-12 m-2">
+                            Casual!
+                        </Button>
+                    </Link>
+                    <Link href="/play/2d">
+                        <Button variant={"destructive"} className="text-3xl mt-2 px-20 py-12 m-2">
+                            2D!
+                        </Button>
+                    </Link>
+                    <Link href="/play/3d">
+                        <Button variant={"destructive"} className="text-3xl mt-2 px-20 py-12 m-2">
+                            3D!
                         </Button>
                     </Link>
                 </div>
             </div>
+</div>
 
         </main>
 

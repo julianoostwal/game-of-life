@@ -31,7 +31,7 @@ export default function Home() {
   const [speed, setSpeed] = useState(100);
   const [blockColor, setBlockColor] = useState<string>('#00ff00');
   const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
-  const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');  
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');
 
   const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
   const [speedEdit, setSpeedEdit] = useState(speed);
@@ -236,7 +236,10 @@ export default function Home() {
           Randomize
         </Button>
         <Link href="/play">
-          <Button variant="outline" className='text-white'>2D</Button>
+          <Button variant="outline" className='text-white'>Casual</Button>
+        </Link>
+        <Link href="/play/3d">
+          <Button variant="outline" className='text-white'>3d</Button>
         </Link>
         <Dialog>
           <DialogTrigger asChild>
