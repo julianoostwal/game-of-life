@@ -5,58 +5,53 @@ import { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
 import { Slider } from "@/components/ui/slider"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import Link from 'next/link';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
+// Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
 
+// Functie om een leeg bord te genereren als een Map
 const generateEmptyBoard = () => new Map();
 
 export default function Home() {
+  // State voor het speelbord, de running status, de bordgrootte, de snelheid en kleuren
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
   const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
-  const sceneContainerRef = useRef(null);
-  const [blockColor, setBlockColor] = useState('#00ff00'); // Initial block color in hex format
+  const [blockColor, setBlockColor] = useState(0x00ff00);
   const [boardGridColor, setBoardGridColor] = useState(0xffffff);
   const [boardBackgroundColor, setBoardBackgroundColor] = useState('#000000'); // Initial background color in hex format
 
-  // Refs to hold Three.js objects
+  // Referenties voor de Three.js objecten
+  const sceneContainerRef = useRef(null);
   const sceneRef = useRef<any>();
   const cameraRef = useRef<any>();
   const rendererRef = useRef<any>();
   const controlsRef = useRef<any>();
   const boardGroupRef = useRef<any>(new THREE.Group());
 
+  // Initialiseer de Three.js scène en renderer
   useEffect(() => {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(boardBackgroundColor); // Set background color
-
+    scene.background = new THREE.Color(boardBackgroundColor); // Stel de achtergrondkleur in
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.set(0, 0, BOARD_SIZE);
+    camera.position.set(0, 0, BOARD_SIZE); // Stel de camerastandpunt in
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight); // Stel de grootte van de renderer in
     renderer.setPixelRatio(window.devicePixelRatio);
     if (sceneContainerRef.current) {
       (sceneContainerRef.current as HTMLElement).appendChild(renderer.domElement);
     }
 
-    // Lighting
+    // Voeg verlichting toe aan de scène
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -64,28 +59,28 @@ export default function Home() {
     pointLight.position.set(10, 10, 10);
     scene.add(pointLight);
 
-    // Add orbit controls
+    // Voeg orbit controls toe om rond de scène te bewegen
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // Add the board group to the scene
+    // Voeg de groep voor de blokken toe aan de scène
     scene.add(boardGroupRef.current);
 
-    // Add a grid helper
+    // Voeg een grid-helper toe om het speelbord weer te geven
     const gridHelper = new THREE.GridHelper(BOARD_SIZE, BOARD_SIZE);
-    gridHelper.position.set(0, 0, 0); // Center the grid
-    gridHelper.rotation.x = Math.PI / 2; // Rotate 90 degrees around the x-axis
+    gridHelper.position.set(0, 0, 0);
+    gridHelper.rotation.x = Math.PI / 2;
     gridHelper.material.color.set(boardGridColor);
 
     scene.add(gridHelper);
 
-    // Save references
+    // Bewaar referenties van de gemaakte objecten
     sceneRef.current = scene;
     cameraRef.current = camera;
     rendererRef.current = renderer;
     controlsRef.current = controls;
 
-    // Animation loop
+    // Animatielus om de scène continu te renderen
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
@@ -93,7 +88,7 @@ export default function Home() {
     };
     animate();
 
-    // Cleanup on unmount
+    // Opruimen bij het afbreken van het component
     return () => {
       renderer.dispose();
       controls.dispose();
@@ -101,38 +96,43 @@ export default function Home() {
         sceneContainerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [BOARD_SIZE, boardBackgroundColor]); // Re-run useEffect when BOARD_SIZE or background color changes
+  }, [BOARD_SIZE, boardBackgroundColor, boardGridColor]);
 
+  // Reset het bord wanneer de grootte van het bord verandert
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
   }, [BOARD_SIZE]);
 
+  // Functie om het speelbord bij te werken met blokken
   const updateBoardVisualization = (newBoard: any) => {
     const boardGroup = boardGroupRef.current;
-    boardGroup.clear();
+    boardGroup.clear(); // Verwijder alle huidige blokken
 
     newBoard.forEach((_: any, key: { split: (arg0: string) => { (): any; new(): any; map: { (arg0: NumberConstructor): [any, any]; new(): any; }; }; }) => {
       const [row, col] = key.split(',').map(Number);
 
+      // Controleer of het blok binnen de grenzen van het bord ligt
       if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
-        return; // Skip adding blocks that are outside the grid
+        return; // Sla blokken over die buiten het bord vallen
       }
 
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(blockColor) }); // Set block color
       const cube = new THREE.Mesh(geometry, material);
 
-      // Align blocks with the grid
+      // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
       cube.position.set(col - BOARD_SIZE / 2 + 0.5, BOARD_SIZE / 2 - row - 0.5, 0);
       boardGroup.add(cube);
     });
   };
 
+  // Functie om de volgende generatie van het bord te berekenen
   const getNextGeneration = () => {
     const newBoard = new Map();
     const neighborCount = new Map();
 
+    // Tel het aantal buren voor elke cel
     board.forEach((_, key) => {
       const [row, col] = key.split(',').map(Number);
       for (let i = -1; i <= 1; i++) {
@@ -147,6 +147,7 @@ export default function Home() {
       }
     });
 
+    // Bepaal of een cel blijft bestaan of een nieuwe cel wordt toegevoegd
     neighborCount.forEach((count, key) => {
       if (count === 3 || (count === 2 && board.has(key))) {
         newBoard.set(key, true);
@@ -156,6 +157,7 @@ export default function Home() {
     return newBoard;
   };
 
+  // Functie om het bord willekeurig te vullen met blokken
   const randomizeBoard = (density = 0.1) => {
     const newBoard = new Map();
     for (let row = 0; row < BOARD_SIZE; row++) {
@@ -168,6 +170,7 @@ export default function Home() {
     setBoard(newBoard);
   };
 
+  // Start of stop de simulatie op basis van de "running" status
   useEffect(() => {
     if (!running) return;
 
@@ -178,35 +181,32 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board]);
 
-
+  // Werk de visualisatie bij wanneer het bord verandert
   useEffect(() => {
     updateBoardVisualization(board);
-  }, [board, blockColor]); 
+  }, [board, blockColor]);
 
   return (
-    <main className="container mx-auto min-h-screen p-4">
-      <div
-        ref={sceneContainerRef}
-        className="flex justify-center"
-        style={{ width: '100%', height: '80vh' }}
-      />
+      <main className="container mx-auto min-h-screen p-4">
+          {/* Scene container waar de Three.js scène wordt weergegeven */}
+          <div ref={sceneContainerRef} className="flex justify-center" style={{ width: "100%", height: "80vh" }} />
 
-      <div className="mt-12 flex gap-3 justify-center">
-        <Button onClick={() => setRunning(!running)} variant="secondary">
-          {running ? 'Stop' : 'Start'}
-        </Button>
-        <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
-          Reset
-        </Button>
-        <Button onClick={() => randomizeBoard()} variant="outline" className='text-white'>Randomize</Button>
+          {/* Bedieningselementen voor de simulatie */}
+          <div className="mt-12 flex gap-3 justify-center">
+              <Button onClick={() => setRunning(!running)} variant="secondary">
+                  {running ? "Stop" : "Start"}
+              </Button>
+              <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
+                  Reset
+              </Button>
+              <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
+                  Randomize
+              </Button>
 
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" color='white' className='text-white'>Edit</Button>
           </DialogTrigger>
-          <Link href="/play">
-            <Button variant="outline" className='text-white'>Back</Button>
-          </Link>
           <DialogContent className="sm:max-w-[425px] bg-white">
             <DialogHeader>
               <DialogTitle>Edit</DialogTitle>
