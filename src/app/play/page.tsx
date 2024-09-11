@@ -1,31 +1,29 @@
-'use client';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { VariableSizeGrid as Grid } from 'react-window';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+"use client";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
-const DEFAULT_BOARD_SIZE = 200;
+const CELL_SIZE = 20;
 
 const generateEmptyBoard = () => new Map();
 
 export default function Home() {
   const [board, setBoard] = useState(generateEmptyBoard);
   const [running, setRunning] = useState(false);
-  const [BOARD_SIZE, setBoardSize] = useState(DEFAULT_BOARD_SIZE);
   const [speed, setSpeed] = useState(100);
-  // const [blockColor, setBlockColor] = useState<string>('#00ff00');
-  // const [boardGridColor, setBoardGridColor] = useState<string>('#ffffff');
-  // const [boardBackgroundColor, setBoardBackgroundColor] = useState<string>('#000000');  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight - 100, // Reserve space for buttons
+  });
 
-  const [BOARD_SIZEEdit, setBoardSizeEdit] = useState(BOARD_SIZE);
-  const [speedEdit, setSpeedEdit] = useState(speed);
-  // const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
-  // const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
-  // const [boardBackgroundColorEdit, setBoardBackgroundColorEdit] = useState(boardBackgroundColor);
+  const handleResize = () => {
+    setCanvasSize({
+      width: window.innerWidth,
+      height: window.innerHeight - 100, // Reserve space for buttons
+    });
+  };
 
   const toggleCell = (row: number, col: number) => {
     const newBoard = new Map(board);
@@ -43,12 +41,15 @@ export default function Home() {
     const neighborCount = new Map();
 
     board.forEach((_, key) => {
-      const [row, col] = key.split(',').map(Number);
+      const [row, col] = key.split(",").map(Number);
       for (let i = -1; i <= 1; i++) {
         for (let j = -1; j <= 1; j++) {
           if (i === 0 && j === 0) continue;
           const neighborKey = `${row + i},${col + j}`;
-          neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
+          neighborCount.set(
+            neighborKey,
+            (neighborCount.get(neighborKey) || 0) + 1
+          );
         }
       }
     });
@@ -64,8 +65,8 @@ export default function Home() {
 
   const randomizeBoard = (density = 0.1) => {
     const newBoard = new Map();
-    for (let row = 0; row < BOARD_SIZE; row++) {
-      for (let col = 0; col < BOARD_SIZE; col++) {
+    for (let row = -100; row < 100; row++) {
+      for (let col = -100; col < 100; col++) {
         if (Math.random() < density) {
           newBoard.set(`${row},${col}`, true);
         }
@@ -73,6 +74,44 @@ export default function Home() {
     }
     setBoard(newBoard);
   };
+
+  const drawBoard = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    // Clear the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Get visible area of the canvas
+    const cols = Math.ceil(canvas.width / CELL_SIZE);
+    const rows = Math.ceil(canvas.height / CELL_SIZE);
+
+    // Draw the grid and cells
+    board.forEach((_, key) => {
+      const [row, col] = key.split(",").map(Number);
+      const x = col * CELL_SIZE;
+      const y = row * CELL_SIZE;
+      context.fillStyle = "green";
+      context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+    });
+
+    context.strokeStyle = "black";
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        context.strokeRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
+    }
+  };
+
+  useEffect(() => {
+    drawBoard();
+  }, [board, canvasSize]);
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (!running) return;
@@ -84,128 +123,56 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board]);
 
-  return (
-    <main className="bg-gradient-to-r from-sky-700 to-purple-900  mx-auto min-h-screen p-4">
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const row = Math.floor(y / CELL_SIZE);
+    const col = Math.floor(x / CELL_SIZE);
+
+    toggleCell(row, col);
+  };
+
+  return (
+    <main className="bg-gradient-to-r from-sky-700 to-purple-900 mx-auto min-h-screen p-4 relative">
       <Link href="/">
-      <Button>Exit</Button>
+        <Button className="absolute top-4 left-4 z-10">Exit</Button>
       </Link>
 
-      <div className='flex justify-center'>
+      <div className="flex justify-center">
         <TransformWrapper>
           <TransformComponent>
-            <Grid
-              columnCount={BOARD_SIZE}
-              rowCount={BOARD_SIZE}
-              columnWidth={() => 15}
-              rowHeight={() => 15}
-              width={1200}
-              height={700}
-            >
-              {({ columnIndex, rowIndex, style }) => (
-                <div
-                  style={style}
-                  onClick={() => toggleCell(rowIndex, columnIndex)}
-                  className={`border ${
-                    board.has(`${rowIndex},${columnIndex}`) ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                />
-              )}
-            </Grid>
+            <canvas
+              ref={canvasRef}
+              width={canvasSize.width}
+              height={canvasSize.height}
+              onClick={handleCanvasClick}
+              className="border-2 border-gray-500"
+            />
           </TransformComponent>
         </TransformWrapper>
       </div>
-      <div className="mt-4 flex gap-3 justify-center text-white">
+
+      {/* Control Buttons */}
+      <div className="absolute bottom-0 left-0 w-full p-4 bg-opacity-75 bg-black flex justify-center gap-4">
         <Button onClick={() => setRunning(!running)} variant="outline">
-          {running ? 'Stop' : 'Start'}
+          {running ? "Stop" : "Start"}
         </Button>
         <Button onClick={() => setBoard(generateEmptyBoard())} variant="destructive">
           Reset
         </Button>
-        <Button onClick={() => randomizeBoard()} variant="outline" className='text-white'>
+        <Button onClick={() => randomizeBoard()} variant="outline" className="text-white">
           Randomize
         </Button>
         <Link href="/play/3d">
-          <Button variant="outline" className='text-white'>3D</Button>
+          <Button variant="outline" className="text-white">
+            3d
+          </Button>
         </Link>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="text-white">
-              Settings
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-white">
-            <DialogHeader>
-              <DialogTitle>Settings</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="speed" className="text-right">
-                  Speed
-                </Label>
-                <Slider
-                  defaultValue={[speed]}
-                  max={1000}
-                  min={1}
-                  step={1}
-                  className="w-96"
-                  onValueChange={(value) => setSpeedEdit(value[0])}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="boardSize" className="text-right">
-                  Board Size
-                </Label>
-                <Slider
-                  defaultValue={[BOARD_SIZE]}
-                  max={1000}
-                  min={1}
-                  step={1}
-                  className="w-96"
-                  onValueChange={(value) => setBoardSizeEdit(value[0])}
-                />
-              </div>
-              {/* <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="bgcolor" className="text-right">
-                  Background color
-                </Label>
-                <input
-                  type="color"
-                  id="bgcolor"
-                  value={boardBackgroundColorEdit}
-                  onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
-                />
-                <Label htmlFor="blockcolor" className="text-right">
-                  Block color
-                </Label>
-                <input
-                  type="color"
-                  id="blockcolor"
-                  value={blockColorEdit}
-                  onChange={(e) => setBlockColorEdit(e.target.value)}
-                />
-                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
-                <input
-                  type="color"
-                  id="gridcolor"
-                  value={boardGridColorEdit}
-                  onChange={(e) => setBoardGridColorEdit(e.target.value)}
-                />
-              </div> */}
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="submit" onClick={() => {
-                  setSpeed(speedEdit);
-                  setBoardSize(BOARD_SIZEEdit);
-                  // setBlockColor(blockColorEdit);
-                  // setBoardGridColor(boardGridColorEdit);
-                  // setBoardBackgroundColor(boardBackgroundColorEdit);
-                }}>Save changes</Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </main>
   );
