@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
+import { gsap } from "gsap";
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 15;
@@ -158,7 +159,10 @@ export default function Home() {
 
 
   // Functie om het speelbord bij te werken met blokken in 3D
-  const updateBoardVisualization = (newBoard: any) => {
+  const updateBoardVisualization = (
+    newBoard: any,
+    disappearingBlocks: string[]
+  ) => {
     const boardGroup = boardGroupRef.current;
     boardGroup.clear(); // Verwijder alle huidige blokken
 
@@ -189,26 +193,54 @@ export default function Home() {
       // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
       cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 + 0.5, z - BOARD_SIZE / 2 + 0.5);
       boardGroup.add(cube);
+      
+      // Als dit blok in de lijst van verdwijnende blokken staat, voer dan de animatie uit
+      if (disappearingBlocks.includes(key)) {
+        gsap.to(cube.rotation, {
+          y: "-4", // Draai 4 radianen over de y-as
+          duration: speed / 1000 / 2, // Duur van de animatie in seconden
+          delay: speed / 1000 / 2,
+          repeat: -1, // Oneindig herhalen
+          ease: "none", // Geen vertraging of versnelling
+          yoyo: true,
+        });
+
+        gsap.to(cube.scale, {
+          x: 0, // Schaal op de x-as naar 0
+          y: 0, // Schaal op de y-as naar 0
+          z: 0, // Schaal op de z-as naar 0
+          duration: speed / 1000 / 2, // Duur van de krimp-animatie
+          delay: speed / 1000 / 2, // Wacht totdat de animatie klaar is
+          onComplete: () => {
+            // Verwijder het blok uit de scene als de animatie klaar is
+            boardGroupRef.current.remove(cube);
+          },
+        });
+      }
     });
   };
 
 
-// Functie om de volgende generatie van het bord te berekenen in 3D
-const getNextGeneration = () => {
-  const newBoard = new Map();
-  const neighborCount = new Map();
+  // Functie om de volgende generatie van het bord te berekenen in 3D
+  const getNextGeneration = () => {
+    const newBoard = new Map();
+    const disappearingBlocks: string[] = [];
+    const neighborCount = new Map();
 
-  // Tel het aantal buren voor elke cel
-  board.forEach((_, key) => {
-    const [x, y, z] = key.split(',').map(Number);
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        for (let k = -1; k <= 1; k++) {
-          if (i === 0 && j === 0 && k === 0) continue;
-          const neighborKey = `${x + i},${y + j},${z + k}`;
-          neighborCount.set(neighborKey, (neighborCount.get(neighborKey) || 0) + 1);
+    // Tel het aantal buren voor elke cel
+    board.forEach((_, key) => {
+      const [x, y, z] = key.split(",").map(Number);
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          for (let k = -1; k <= 1; k++) {
+            if (i === 0 && j === 0 && k === 0) continue;
+            const neighborKey = `${x + i},${y + j},${z + k}`;
+            neighborCount.set(
+              neighborKey,
+              (neighborCount.get(neighborKey) || 0) + 1
+            );
+          }
         }
-      }
     }
   });
 
@@ -216,10 +248,12 @@ const getNextGeneration = () => {
   neighborCount.forEach((count, key) => {
     if (count === 3 || (count === 2 && board.has(key))) {
       newBoard.set(key, true);
+    } else if (board.has(key)) {
+      disappearingBlocks.push(key); // Dit blok verdwijnt
     }
   });
 
-  return newBoard;
+  return { newBoard, disappearingBlocks };
 };
 
   // Functie om het bord willekeurig te vullen met blokken in 3D
@@ -242,7 +276,9 @@ const getNextGeneration = () => {
     if (!running) return;
 
     const interval = setInterval(() => {
-      setBoard(getNextGeneration());
+      const { newBoard, disappearingBlocks } = getNextGeneration();
+      setBoard(newBoard);
+      updateBoardVisualization(newBoard, disappearingBlocks);
     }, speed);
 
     return () => clearInterval(interval);
@@ -250,7 +286,7 @@ const getNextGeneration = () => {
 
   // Effect om het bord visueel bij te werken wanneer de staat verandert
   useEffect(() => {
-    updateBoardVisualization(board);
+    updateBoardVisualization(board, []);
   }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
 
   return (
