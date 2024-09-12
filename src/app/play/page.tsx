@@ -1,7 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogFooter, DialogClose, DialogContent, Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  DialogHeader,
+  DialogFooter,
+  DialogClose,
+  DialogContent,
+  Dialog,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import Link from "next/link";
@@ -18,25 +26,39 @@ export default function Home() {
   const [speed, setSpeed] = useState(100);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight - 100, // Reserve space for buttons
+    width: 800, // Default values before client-side rendering
+    height: 600,
   });
 
-  const [blockColor, setBlockColor] = useState<string>('#00ff00');
-  const [boardGridColor, setBoardGridColor] = useState<string>('#000000');
+  const [blockColor, setBlockColor] = useState<string>("#00ff00");
+  const [boardGridColor, setBoardGridColor] = useState<string>("#000000");
   const [randomizedensity, setRandomizedensity] = useState(0.1);
 
   const [speedEdit, setSpeedEdit] = useState(speed);
   const [blockColorEdit, setBlockColorEdit] = useState(blockColor);
   const [boardGridColorEdit, setBoardGridColorEdit] = useState(boardGridColor);
-  const [randomizedensityEdit, setRandomizedensityEdit] = useState(randomizedensity)
+  const [randomizedensityEdit, setRandomizedensityEdit] =
+    useState(randomizedensity);
 
-  const handleResize = () => {
-    setCanvasSize({
-      width: window.innerWidth,
-      height: window.innerHeight - 100, // Reserve space for buttons
-    });
-  };
+  useEffect(() => {
+    // Check if window is defined
+    if (typeof window !== "undefined") {
+      setCanvasSize({
+        width: window.innerWidth,
+        height: window.innerHeight - 100, // Reserve space for buttons
+      });
+
+      const handleResize = () => {
+        setCanvasSize({
+          width: window.innerWidth,
+          height: window.innerHeight - 100, // Reserve space for buttons
+        });
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   const toggleCell = (row: number, col: number) => {
     const newBoard = new Map(board);
@@ -122,11 +144,6 @@ export default function Home() {
   }, [board, canvasSize, blockColor, boardGridColor]);
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
     if (!running) return;
 
     const interval = setInterval(() => {
@@ -134,7 +151,7 @@ export default function Home() {
     }, speed);
 
     return () => clearInterval(interval);
-  }, [running, board]);
+  }, [running, board, speed]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -238,7 +255,9 @@ export default function Home() {
                   value={blockColorEdit}
                   onChange={(e) => setBlockColorEdit(e.target.value)}
                 />
-                  <Label htmlFor="blockcolor" className="text-right">Grid color</Label>
+                <Label htmlFor="blockcolor" className="text-right">
+                  Grid color
+                </Label>
                 <input
                   type="color"
                   id="gridcolor"
@@ -249,12 +268,17 @@ export default function Home() {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="submit" onClick={() => {
-                  setSpeed(speedEdit);
-                  setRandomizedensity(randomizedensityEdit);
-                  setBlockColor(blockColorEdit);
-                  setBoardGridColor(boardGridColorEdit);
-                }}>Save changes</Button>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    setSpeed(speedEdit);
+                    setRandomizedensity(randomizedensityEdit);
+                    setBlockColor(blockColorEdit);
+                    setBoardGridColor(boardGridColorEdit);
+                  }}
+                >
+                  Save changes
+                </Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>

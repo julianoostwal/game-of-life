@@ -52,6 +52,8 @@ export default function Home() {
 
   // Initialiseer de Three.js scène en renderer
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(boardBackgroundColor); // Stel de achtergrondkleur in
     const camera = new THREE.PerspectiveCamera(

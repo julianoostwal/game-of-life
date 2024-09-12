@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
@@ -59,6 +58,8 @@ export default function Home() {
 
   // Initialiseer de Three.js scène en renderer
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(boardBackgroundColor); // Stel de achtergrondkleur in
     const camera = new THREE.PerspectiveCamera(
@@ -146,22 +147,12 @@ export default function Home() {
 
   // Functie om randen rond het hele bord te maken
   const createBoardOutline = () => {
-    // Maak een box-geometrie die overeenkomt met de grootte van het hele bord
     const outlineGeometry = new THREE.BoxGeometry(BOARD_SIZE, BOARD_SIZE, BOARD_SIZE);
-    
-    // Maak randen van de geometrie
     const outlineEdges = new THREE.EdgesGeometry(outlineGeometry);
-
-    // Maak een lijnmateriaal met de gewenste kleur (bijv. wit)
     const outlineMaterial = new THREE.LineBasicMaterial({ color: boardOutlineColor});
-
-    // Maak de lijnsegmenten om de omtrek te vormen
     const outline = new THREE.LineSegments(outlineEdges, outlineMaterial);
+    outline.position.set(0, 0, 0);
 
-    // Centreer de omtrek in het midden van het bord
-    outline.position.set(0, -1, 0);
-
-    // Retourneer het outline-object
     return outline;
   };
 
@@ -196,7 +187,7 @@ export default function Home() {
       }
 
       // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
-      cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 - 0.5, z - BOARD_SIZE / 2 + 0.5);
+      cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 + 0.5, z - BOARD_SIZE / 2 + 0.5);
       boardGroup.add(cube);
     });
   };
@@ -231,22 +222,20 @@ const getNextGeneration = () => {
   return newBoard;
 };
 
-
-// Functie om het bord willekeurig te vullen met blokken in 3D
-const randomizeBoard = (density = randomizedensity) => {
-  const newBoard = new Map();
-  for (let x = 0; x < BOARD_SIZE; x++) {
-    for (let y = 0; y < BOARD_SIZE; y++) {
-      for (let z = 0; z < BOARD_SIZE; z++) {
-        if (Math.random() < density) {
-          newBoard.set(`${x},${y},${z}`, true); // Voeg de Z-coördinaat toe
+  // Functie om het bord willekeurig te vullen met blokken in 3D
+  const randomizeBoard = (density = randomizedensity) => {
+    const newBoard = new Map();
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      for (let y = 0; y < BOARD_SIZE; y++) {
+        for (let z = 0; z < BOARD_SIZE; z++) {
+          if (Math.random() < density) {
+            newBoard.set(`${x},${y},${z}`, true); // Voeg de Z-coördinaat toe
+          }
         }
       }
     }
-  }
-  setBoard(newBoard);
-};
-
+    setBoard(newBoard);
+  };
 
   // Start of stop de simulatie op basis van de "running" status
   useEffect(() => {
@@ -259,21 +248,19 @@ const randomizeBoard = (density = randomizedensity) => {
     return () => clearInterval(interval);
   }, [running, board, speed]);
 
-  // Werk de visualisatie bij wanneer het bord verandert
+  // Effect om het bord visueel bij te werken wanneer de staat verandert
   useEffect(() => {
     updateBoardVisualization(board);
-  }, [board, blockColor, blockEdges]);
+  }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
 
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
-      {/* Scene container waar de Three.js scène wordt weergegeven */}
       <div
         ref={sceneContainerRef}
         className="flex justify-center"
         style={{ width: '100%', height: '80vh' }}
       />
 
-      {/* Bedieningselementen voor de simulatie */}
       <div className="mt-12 flex gap-3 justify-center">
         <Button onClick={() => setRunning(!running)} variant="secondary">
           {running ? 'Stop' : 'Start'}
@@ -300,76 +287,65 @@ const randomizeBoard = (density = randomizedensity) => {
             <DialogHeader>
               <DialogTitle>Settings</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="speed" className="text-right">
-                  Delay
-                </Label>
-                <Slider
-                  defaultValue={[speedEdit]}
-                  max={1000}
-                  min={1}
-                  step={1}
-                  className="w-64"
-                  onValueChange={(value) => setSpeedEdit(value[0])}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="boardSize" className="text-right">
-                  Board Size
-                </Label>
-                <Slider
-                  defaultValue={[BOARD_SIZEEdit]}
-                  max={100}
-                  min={5}
-                  step={1}
-                  className="w-64"
-                  onValueChange={(value) => setBoardSizeEdit(value[0])}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="boardSize" className="text-right">
-                  Randomize Density
-                </Label>
-                <Slider
-                  defaultValue={[randomizedensityEdit]}
-                  max={1}
-                  min={0.001}
-                  step={0.001}
-                  className="w-64"
-                  onValueChange={(value) => setRandomizedensityEdit(value[0])}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="bgcolor" className="text-right">
-                  Background color
-                </Label>
-                <input
-                  type="color"
-                  id="bgcolor"
-                  value={boardBackgroundColorEdit}
-                  onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
-                />
-                <Label htmlFor="blockcolor" className="text-right">
-                  Block color
-                </Label>
-                <input
-                  type="color"
-                  id="blockcolor"
-                  value={blockColorEdit}
-                  onChange={(e) => setBlockColorEdit(e.target.value)}
-                />
-              </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="edges" checked={blockEdgesEdit} onCheckedChange={(e) => setBlockEdgesEdit(e as boolean)} />
-              <label
-                htmlFor="edges"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Enable edges
-              </label>
-            </div>
-            </div>
+            <Label htmlFor="board-size">Board Size: {BOARD_SIZEEdit}</Label>
+            <Slider
+              value={[BOARD_SIZEEdit]}
+              onValueChange={(value) => setBoardSizeEdit(value[0])}
+              min={10}
+              max={30}
+              step={1}
+            />
+
+            <Label htmlFor="speed">Speed: {speedEdit} ms</Label>
+            <Slider
+              value={[speedEdit]}
+              onValueChange={(value) => setSpeedEdit(value[0])}
+              min={5}
+              max={1000}
+              step={10}
+            />
+
+            <Label htmlFor="block-color">Block Color</Label>
+            <input
+              type="color"
+              value={blockColorEdit}
+              onChange={(e) => setBlockColorEdit(e.target.value)}
+            />
+
+            <Label htmlFor="board-background-color">Board Background Color</Label>
+            <input
+              type="color"
+              value={boardBackgroundColorEdit}
+              onChange={(e) => setBoardBackgroundColorEdit(e.target.value)}
+            />
+
+            <Label>Block Edges</Label>
+            <Checkbox
+              checked={blockEdgesEdit}
+              onCheckedChange={(checked) => setBlockEdgesEdit(checked as boolean)}
+            />
+
+            <Label htmlFor="randomize-density">Randomize Density: {randomizedensityEdit}</Label>
+            <Slider
+              value={[randomizedensityEdit]}
+              onValueChange={(value) => setRandomizedensityEdit(value[0])}
+              min={0.1}
+              max={1}
+              step={0.1}
+            />
+
+            <Label>Board Outline</Label>
+            <Checkbox
+              checked={boardOutlineEdit}
+              onCheckedChange={(checked) => setBoardOutlineEdit(checked as boolean)}
+            />
+
+            <Label htmlFor="board-outline-color">Board Outline Color</Label>
+            <input
+              type="color"
+              value={boardOutlineColorEdit}
+              onChange={(e) => setBoardOutlineColorEdit(e.target.value)}
+            />
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="submit" onClick={() => {
@@ -379,6 +355,8 @@ const randomizeBoard = (density = randomizedensity) => {
                   setBoardBackgroundColor(boardBackgroundColorEdit);
                   setRandomizedensity(randomizedensityEdit);
                   setBlockEdges(blockEdgesEdit);
+                  setBoardOutline(boardOutlineEdit);
+                  setBoardOutlineColor(boardOutlineColorEdit);
                 }}>Save changes</Button>
               </DialogClose>
             </DialogFooter>
