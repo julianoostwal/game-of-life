@@ -193,7 +193,7 @@ export default function Home() {
       // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
       cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 + 0.5, z - BOARD_SIZE / 2 + 0.5);
       boardGroup.add(cube);
-      
+
       // Als dit blok in de lijst van verdwijnende blokken staat, voer dan de animatie uit
       if (disappearingBlocks.includes(key)) {
         gsap.to(cube.rotation, {
@@ -288,7 +288,7 @@ export default function Home() {
   useEffect(() => {
     updateBoardVisualization(board, []);
   }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
-
+// frontend
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
       <div
