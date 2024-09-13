@@ -17,6 +17,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import FPSStats from 'react-fps-stats';
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 80;
@@ -222,14 +223,16 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
-      {/* Scene container waar de Three.js scène wordt weergegeven */}
       <div
         ref={sceneContainerRef}
         className="flex justify-center"
         style={{ width: '100%', height: '80vh' }}
       />
 
-      {/* Bedieningselementen voor de simulatie */}
+      <div>
+        <FPSStats top={0} right={0} left="auto" />
+      </div>
+
       <div className="mt-12 flex gap-3 justify-center">
         <Button onClick={() => setRunning(!running)} variant="secondary">
           {running ? 'Stop' : 'Start'}

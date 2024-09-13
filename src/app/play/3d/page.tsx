@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
@@ -18,7 +19,9 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
-import { gsap } from "gsap";
+// import { gsap } from "gsap";
+import FPSStats from 'react-fps-stats';
+
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 15;
@@ -138,6 +141,7 @@ export default function Home() {
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
+    updateBoardVisualization(generateEmptyBoard(), []);
   }, [BOARD_SIZE]);
 
   const createEdges = (geometry: THREE.BoxGeometry) => {
@@ -173,11 +177,11 @@ export default function Home() {
     }
 
     newBoard.forEach((_: any, key: string) => {
-      const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
+      const [x, y, z] = key.split(',').map(Number);
 
       // Controleer of het blok binnen de grenzen van het bord ligt
       if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE || z < 0 || z >= BOARD_SIZE) {
-        return; // Sla blokken over die buiten het bord vallen
+        return  newBoard.delete(key);
       }
 
       const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -195,28 +199,28 @@ export default function Home() {
       boardGroup.add(cube);
 
       // Als dit blok in de lijst van verdwijnende blokken staat, voer dan de animatie uit
-      if (disappearingBlocks.includes(key)) {
-        gsap.to(cube.rotation, {
-          y: "-4", // Draai 4 radianen over de y-as
-          duration: speed / 1000 / 2, // Duur van de animatie in seconden
-          delay: speed / 1000 / 2,
-          repeat: -1, // Oneindig herhalen
-          ease: "none", // Geen vertraging of versnelling
-          yoyo: true,
-        });
+      // if (disappearingBlocks.includes(key)) {
+      //   gsap.to(cube.rotation, {
+      //     y: "-4", // Draai 4 radianen over de y-as
+      //     duration: speed / 1000 / 2, // Duur van de animatie in seconden
+      //     delay: speed / 1000 / 2,
+      //     repeat: -1, // Oneindig herhalen
+      //     ease: "none", // Geen vertraging of versnelling
+      //     yoyo: true,
+      //   });
 
-        gsap.to(cube.scale, {
-          x: 0, // Schaal op de x-as naar 0
-          y: 0, // Schaal op de y-as naar 0
-          z: 0, // Schaal op de z-as naar 0
-          duration: speed / 1000 / 2, // Duur van de krimp-animatie
-          delay: speed / 1000 / 2, // Wacht totdat de animatie klaar is
-          onComplete: () => {
-            // Verwijder het blok uit de scene als de animatie klaar is
-            boardGroupRef.current.remove(cube);
-          },
-        });
-      }
+      //   gsap.to(cube.scale, {
+      //     x: 0, // Schaal op de x-as naar 0
+      //     y: 0, // Schaal op de y-as naar 0
+      //     z: 0, // Schaal op de z-as naar 0
+      //     duration: speed / 1000 / 2, // Duur van de krimp-animatie
+      //     delay: speed / 1000 / 2, // Wacht totdat de animatie klaar is
+      //     onComplete: () => {
+      //       // Verwijder het blok uit de scene als de animatie klaar is
+      //       // boardGroupRef.current.remove(cube);
+      //     },
+      //   });
+      // }
     });
   };
 
@@ -253,6 +257,8 @@ export default function Home() {
     }
   });
 
+
+
   return { newBoard, disappearingBlocks };
 };
 
@@ -269,6 +275,7 @@ export default function Home() {
       }
     }
     setBoard(newBoard);
+    updateBoardVisualization(newBoard, []);
   };
 
   // Start of stop de simulatie op basis van de "running" status
@@ -287,8 +294,8 @@ export default function Home() {
   // Effect om het bord visueel bij te werken wanneer de staat verandert
   useEffect(() => {
     updateBoardVisualization(board, []);
-  }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
-// frontend
+  }, [blockColor, boardOutline, blockEdges, boardOutlineColor]);
+
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
       <div
@@ -296,6 +303,9 @@ export default function Home() {
         className="flex justify-center"
         style={{ width: '100%', height: '80vh' }}
       />
+      <div>
+        <FPSStats top={0} right={0} left="auto" />
+      </div>
 
       <div className="mt-12 flex gap-3 justify-center">
         <Button onClick={() => setRunning(!running)} variant="secondary">
@@ -328,7 +338,7 @@ export default function Home() {
               value={[BOARD_SIZEEdit]}
               onValueChange={(value) => setBoardSizeEdit(value[0])}
               min={10}
-              max={30}
+              max={50}
               step={1}
             />
 
@@ -365,7 +375,7 @@ export default function Home() {
             <Slider
               value={[randomizedensityEdit]}
               onValueChange={(value) => setRandomizedensityEdit(value[0])}
-              min={0.1}
+              min={0.01}
               max={1}
               step={0.1}
             />
