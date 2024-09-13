@@ -62,9 +62,7 @@ Meer complexiteit door de derde dimensie
 
 ## Instellingen
 In het Instellingen-menu kun je de volgende elementen aanpassen:
-
-## Simulatiesnelheid: 
-Pas de snelheid van de generatiecyclus aan.
+Simulatiesnelheid: Pas de snelheid van de generatiecyclus aan.
 Hoeveelheid blokken: Stel het aantal cellen of blokken in op het raster.
 Alle andere instellingen zoals kleuren, randgedrag en startpatronen kunnen tijdens het spel worden aangepast via het menu onderaan het scherm.
 
