@@ -141,6 +141,7 @@ export default function Home() {
   useEffect(() => {
     setRunning(false);
     setBoard(generateEmptyBoard());
+    updateBoardVisualization(generateEmptyBoard(), []);
   }, [BOARD_SIZE]);
 
   const createEdges = (geometry: THREE.BoxGeometry) => {
@@ -337,7 +338,7 @@ export default function Home() {
               value={[BOARD_SIZEEdit]}
               onValueChange={(value) => setBoardSizeEdit(value[0])}
               min={10}
-              max={30}
+              max={50}
               step={1}
             />
 
@@ -374,7 +375,7 @@ export default function Home() {
             <Slider
               value={[randomizedensityEdit]}
               onValueChange={(value) => setRandomizedensityEdit(value[0])}
-              min={0.1}
+              min={0.01}
               max={1}
               step={0.1}
             />
