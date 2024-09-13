@@ -51,6 +51,9 @@ Welkom bij Game of Life! Dit spel is gebaseerd op het beroemde cellulair-automaa
 ## 2D Modus
 Speel in een traditioneel tweedimensionaal raster. Elke cel is levend of dood, en het raster evolueert met de tijd op basis van Conway’s regels.
 
+## 3D Modus
+Speel in een 3D modus, je kan van elke kan alle blokken zien. Het is prachtig!
+
 ## Kenmerken:
 Overzichtelijke rasterweergave
 Vlotte simulatie om patronen zoals gliders en oscillatoren te zien
