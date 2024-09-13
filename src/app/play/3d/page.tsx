@@ -19,8 +19,9 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { Checkbox } from '@/components/ui/checkbox';
-import { gsap } from "gsap";
+// import { gsap } from "gsap";
 import FPSStats from 'react-fps-stats';
+
 
 // Standaardgrootte van het speelbord
 const DEFAULT_BOARD_SIZE = 15;
