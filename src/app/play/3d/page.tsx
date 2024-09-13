@@ -173,11 +173,11 @@ export default function Home() {
     }
 
     newBoard.forEach((_: any, key: string) => {
-      const [x, y, z] = key.split(',').map(Number); // Voeg de derde dimensie toe
+      const [x, y, z] = key.split(',').map(Number);
 
       // Controleer of het blok binnen de grenzen van het bord ligt
       if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE || z < 0 || z >= BOARD_SIZE) {
-        return; // Sla blokken over die buiten het bord vallen
+        return  newBoard.delete(key);
       }
 
       const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -195,28 +195,28 @@ export default function Home() {
       boardGroup.add(cube);
       
       // Als dit blok in de lijst van verdwijnende blokken staat, voer dan de animatie uit
-      if (disappearingBlocks.includes(key)) {
-        gsap.to(cube.rotation, {
-          y: "-4", // Draai 4 radianen over de y-as
-          duration: speed / 1000 / 2, // Duur van de animatie in seconden
-          delay: speed / 1000 / 2,
-          repeat: -1, // Oneindig herhalen
-          ease: "none", // Geen vertraging of versnelling
-          yoyo: true,
-        });
+      // if (disappearingBlocks.includes(key)) {
+      //   gsap.to(cube.rotation, {
+      //     y: "-4", // Draai 4 radianen over de y-as
+      //     duration: speed / 1000 / 2, // Duur van de animatie in seconden
+      //     delay: speed / 1000 / 2,
+      //     repeat: -1, // Oneindig herhalen
+      //     ease: "none", // Geen vertraging of versnelling
+      //     yoyo: true,
+      //   });
 
-        gsap.to(cube.scale, {
-          x: 0, // Schaal op de x-as naar 0
-          y: 0, // Schaal op de y-as naar 0
-          z: 0, // Schaal op de z-as naar 0
-          duration: speed / 1000 / 2, // Duur van de krimp-animatie
-          delay: speed / 1000 / 2, // Wacht totdat de animatie klaar is
-          onComplete: () => {
-            // Verwijder het blok uit de scene als de animatie klaar is
-            boardGroupRef.current.remove(cube);
-          },
-        });
-      }
+      //   gsap.to(cube.scale, {
+      //     x: 0, // Schaal op de x-as naar 0
+      //     y: 0, // Schaal op de y-as naar 0
+      //     z: 0, // Schaal op de z-as naar 0
+      //     duration: speed / 1000 / 2, // Duur van de krimp-animatie
+      //     delay: speed / 1000 / 2, // Wacht totdat de animatie klaar is
+      //     onComplete: () => {
+      //       // Verwijder het blok uit de scene als de animatie klaar is
+      //       // boardGroupRef.current.remove(cube);
+      //     },
+      //   });
+      // }
     });
   };
 
@@ -253,6 +253,9 @@ export default function Home() {
     }
   });
 
+
+  // console.log(newBoard, disappearingBlocks);
+
   return { newBoard, disappearingBlocks };
 };
 
@@ -284,10 +287,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board, speed]);
 
-  // Effect om het bord visueel bij te werken wanneer de staat verandert
-  useEffect(() => {
-    updateBoardVisualization(board, []);
-  }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
+  // // Effect om het bord visueel bij te werken wanneer de staat verandert
+  // useEffect(() => {
+  //   updateBoardVisualization(board, []);
+  // }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
 
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
