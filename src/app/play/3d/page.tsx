@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
@@ -193,7 +194,7 @@ export default function Home() {
       // Stel de positie van de blokken in zodat ze uitgelijnd zijn met het grid
       cube.position.set(x - BOARD_SIZE / 2 + 0.5, y - BOARD_SIZE / 2 + 0.5, z - BOARD_SIZE / 2 + 0.5);
       boardGroup.add(cube);
-      
+
       // Als dit blok in de lijst van verdwijnende blokken staat, voer dan de animatie uit
       // if (disappearingBlocks.includes(key)) {
       //   gsap.to(cube.rotation, {
@@ -254,7 +255,6 @@ export default function Home() {
   });
 
 
-  // console.log(newBoard, disappearingBlocks);
 
   return { newBoard, disappearingBlocks };
 };
@@ -272,6 +272,7 @@ export default function Home() {
       }
     }
     setBoard(newBoard);
+    updateBoardVisualization(newBoard, []);
   };
 
   // Start of stop de simulatie op basis van de "running" status
@@ -287,10 +288,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [running, board, speed]);
 
-  // // Effect om het bord visueel bij te werken wanneer de staat verandert
-  // useEffect(() => {
-  //   updateBoardVisualization(board, []);
-  // }, [board, blockColor, boardOutline, blockEdges, boardOutlineColor]);
+  // Effect om het bord visueel bij te werken wanneer de staat verandert
+  useEffect(() => {
+    updateBoardVisualization(board, []);
+  }, [blockColor, boardOutline, blockEdges, boardOutlineColor]);
 
   return (
     <main className="mx-auto min-h-screen p-4" style={{backgroundColor: boardBackgroundColor}}>
