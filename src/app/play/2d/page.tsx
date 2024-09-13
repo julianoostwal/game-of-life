@@ -56,7 +56,7 @@ export default function Home() {
     if (typeof window === 'undefined') return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(boardBackgroundColor); // Stel de achtergrondkleur in
+    scene.background = new THREE.Color(boardBackgroundColor);
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,

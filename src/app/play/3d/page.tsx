@@ -146,7 +146,7 @@ export default function Home() {
 
   const createEdges = (geometry: THREE.BoxGeometry) => {
     const edges = new THREE.EdgesGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Black color
+    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
     return new THREE.LineSegments(edges, lineMaterial);
   };
 
@@ -257,8 +257,6 @@ export default function Home() {
     }
   });
 
-
-
   return { newBoard, disappearingBlocks };
 };
 
@@ -269,7 +267,7 @@ export default function Home() {
       for (let y = 0; y < BOARD_SIZE; y++) {
         for (let z = 0; z < BOARD_SIZE; z++) {
           if (Math.random() < density) {
-            newBoard.set(`${x},${y},${z}`, true); // Voeg de Z-coördinaat toe
+            newBoard.set(`${x},${y},${z}`, true);
           }
         }
       }
