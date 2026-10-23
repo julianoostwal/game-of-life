@@ -21,7 +21,7 @@
     "framer-motion": "^11.5.4",
     "gsap": "^3.12.5",
     "lucide-react": "^0.439.0",
-    "next": "14.2.8",
+    "next": "15.5.28",
     "react": "^18",
     "react-dom": "^18",
     "react-fps-stats": "^0.3.1",
