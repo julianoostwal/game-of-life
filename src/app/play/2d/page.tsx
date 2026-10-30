@@ -45,10 +45,10 @@ export default function Home() {
 
   // Referenties voor de Three.js objecten
   const sceneContainerRef = useRef<any>(null);
-  const sceneRef = useRef<any>();
-  const cameraRef = useRef<any>();
-  const rendererRef = useRef<any>();
-  const controlsRef = useRef<any>();
+  const sceneRef = useRef<any>(undefined);
+  const cameraRef = useRef<any>(undefined);
+  const rendererRef = useRef<any>(undefined);
+  const controlsRef = useRef<any>(undefined);
   const boardGroupRef = useRef<any>(new THREE.Group());
 
   // Initialiseer de Three.js scène en renderer
