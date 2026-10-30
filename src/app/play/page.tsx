@@ -168,7 +168,7 @@ export default function Home() {
   };
 
   return (
-    <main className="bg-gradient-to-r from-sky-700 to-purple-900 mx-auto min-h-screen p-4 relative">
+    <main className="bg-linear-to-r from-sky-700 to-purple-900 mx-auto min-h-screen p-4 relative">
       <Link href="/">
         <Button className="absolute top-4 left-4 z-10">Exit</Button>
       </Link>
